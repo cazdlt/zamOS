@@ -13,8 +13,8 @@ services:
       - PORT=3000
     volumes:
       - ./data:/data
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
+      - /proc:/proc:ro
+      - /sys:/sys:ro
     cap_add:
       - SYS_ADMIN
     restart: unless-stopped

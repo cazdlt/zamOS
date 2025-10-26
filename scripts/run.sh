@@ -19,9 +19,6 @@ git pull origin main
 echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"
 docker compose down
 
-echo -e "${YELLOW}🗑️  Removing old images...${NC}"
-docker rmi $APP_NAME 2>/dev/null || true
-
 echo -e "${YELLOW}🔨 Building new image...${NC}"
 docker compose build --no-cache
 
