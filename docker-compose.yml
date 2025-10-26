@@ -15,8 +15,7 @@ services:
       - ./data:/data
       - /proc:/proc:ro
       - /sys:/sys:ro
-    cap_add:
-      - SYS_ADMIN
+    privileged: true
     restart: unless-stopped
     networks:
       - zamos-network
