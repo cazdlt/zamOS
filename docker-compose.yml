@@ -13,8 +13,8 @@ services:
       - PORT=3000
     volumes:
       - ./data:/data
-      - /proc:/proc:ro
-      - /sys:/sys:ro
+      - /proc:/proc
+      - /sys:/sys
     privileged: true
     security_opt:
       - apparmor=unconfined
