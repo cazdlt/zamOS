@@ -22,12 +22,6 @@ docker compose down
 echo -e "${YELLOW}🗑️  Removing old images...${NC}"
 docker rmi $APP_NAME 2>/dev/null || true
 
-echo -e "${BLUE}📦 Installing dependencies...${NC}"
-npm ci
-
-echo -e "${BLUE}🗄️  Running database migrations...${NC}"
-npm run db:migrate
-
 echo -e "${YELLOW}🔨 Building new image...${NC}"
 docker compose build --no-cache
 
