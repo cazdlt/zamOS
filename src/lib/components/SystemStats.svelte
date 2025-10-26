@@ -8,56 +8,68 @@
 		color: string;
 	}
 
+	interface SystemMetrics {
+		cpu: number;
+		ramUsed: number;
+		ramTotal: number;
+		diskUsed: number;
+		diskTotal: number;
+		timestamp: number;
+	}
+
 	let stats = $state<StatData[]>([
 		{
 			label: 'CPU Usage',
-			value: 45,
+			value: 0,
 			unit: '%',
 			icon: '⚡',
 			color: 'from-blue-500 to-cyan-500'
 		},
 		{
 			label: 'RAM',
-			value: 12.4,
-			total: 32,
+			value: 0,
+			total: 0,
 			unit: 'GB',
 			icon: '🧠',
 			color: 'from-purple-500 to-pink-500'
 		},
 		{
 			label: 'Disk',
-			value: 842,
-			total: 2000,
+			value: 0,
+			total: 0,
 			unit: 'GB',
 			icon: '💾',
 			color: 'from-cyan-500 to-blue-500'
-		},
-		{
-			label: 'Temperature',
-			value: 52,
-			unit: '°C',
-			icon: '🌡️',
-			color: 'from-orange-500 to-red-500'
 		}
 	]);
 
-	// Simulate real-time updates
-	$effect(() => {
-		const interval = setInterval(() => {
-			stats = stats.map((stat) => {
-				if (stat.label === 'CPU Usage') {
-					return { ...stat, value: Math.floor(Math.random() * 40) + 30 };
-				}
-				if (stat.label === 'RAM') {
-					return { ...stat, value: parseFloat((Math.random() * 4 + 10).toFixed(1)) };
-				}
-				if (stat.label === 'Temperature') {
-					return { ...stat, value: Math.floor(Math.random() * 10) + 48 };
-				}
-				return stat;
-			});
-		}, 2000);
+	async function fetchMetrics() {
+		try {
+			const response = await fetch('/api/metrics/system');
+			if (response.ok) {
+				const data: SystemMetrics = await response.json();
+				stats = stats.map((stat) => {
+					if (stat.label === 'CPU Usage') {
+						return { ...stat, value: data.cpu };
+					}
+					if (stat.label === 'RAM') {
+						return { ...stat, value: data.ramUsed, total: data.ramTotal };
+					}
+					if (stat.label === 'Disk') {
+						return { ...stat, value: data.diskUsed, total: data.diskTotal };
+					}
+					return stat;
+				});
+			}
+		} catch (error) {
+			console.error('Failed to fetch system metrics:', error);
+		}
+	}
 
+	// Fetch metrics on mount and every 2 seconds
+	$effect(() => {
+		fetchMetrics();
+		const interval = setInterval(fetchMetrics, 2000);
 		return () => clearInterval(interval);
 	});
 
@@ -75,26 +87,26 @@
 	}
 </script>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-	{#each stats as stat}
-		<div class="glass rounded-2xl p-6 transition-all duration-300 glass-hover">
-			<div class="flex items-center gap-3 mb-4">
-				<span class="text-2xl">{stat.icon}</span>
-				<span class="text-sm font-medium text-gray-400 uppercase tracking-wider">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+	{#each stats as stat (stat.label)}
+		<div class="glass rounded-xl p-4 transition-all duration-300 glass-hover">
+			<div class="flex items-center gap-2 mb-3">
+				<span class="text-xl">{stat.icon}</span>
+				<span class="text-xs font-medium text-gray-400 uppercase tracking-wider">
 					{stat.label}
 				</span>
 			</div>
-			<div class="mb-4">
-				<span class="text-3xl font-bold text-white tabular-nums">
+			<div class="mb-3">
+				<span class="text-2xl font-bold text-white tabular-nums">
 					{stat.value}{stat.unit}
 				</span>
 				{#if stat.total}
-					<span class="text-xl text-gray-600 font-normal ml-1">
+					<span class="text-lg text-gray-600 font-normal ml-1">
 						/ {stat.total}{stat.unit}
 					</span>
 				{/if}
 			</div>
-			<div class="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-2">
+			<div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-1.5">
 				<div
 					class="h-full transition-all duration-500 rounded-full {getStatusColor(
 						getPercentage(stat)
@@ -102,7 +114,7 @@
 					style="width: {getPercentage(stat)}%"
 				></div>
 			</div>
-			<div class="text-sm text-gray-500 text-right tabular-nums">
+			<div class="text-xs text-gray-500 text-right tabular-nums">
 				{getPercentage(stat).toFixed(1)}%
 			</div>
 		</div>

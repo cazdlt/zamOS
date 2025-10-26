@@ -30,6 +30,26 @@
 		background-clip: text;
 	}
 
+	.bg-primary-500 {
+		background-color: #667eea;
+	}
+
+	.bg-primary-600 {
+		background-color: #5568d3;
+	}
+
+	.hover\:bg-primary-600:hover {
+		background-color: #5568d3;
+	}
+
+	.focus\:border-primary-500:focus {
+		border-color: #667eea;
+	}
+
+	.focus\:ring-primary-500:focus {
+		--tw-ring-color: #667eea;
+	}
+
 	.glass {
 		background: rgba(255, 255, 255, 0.05);
 		backdrop-filter: blur(12px);

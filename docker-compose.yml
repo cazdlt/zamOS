@@ -7,15 +7,21 @@ services:
       dockerfile: Dockerfile
     container_name: zamos-dashboard
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
       - PORT=3000
+    volumes:
+      - ./data:/app/data
+      - /proc:/proc:ro
+      - /sys:/sys:ro
+      - /:/rootfs:ro
+    privileged: true
     restart: unless-stopped
     networks:
       - zamos-network
     labels:
-      - "com.centurylinklabs.watchtower.enable=true"
+      - 'com.centurylinklabs.watchtower.enable=true'
 
 networks:
   zamos-network:
