@@ -12,11 +12,11 @@ services:
       - NODE_ENV=production
       - PORT=3000
     volumes:
-      - ./data:/app/data
-      - /proc:/proc:ro
-      - /sys:/sys:ro
-      - /:/rootfs:ro
-    privileged: true
+      - ./data:/data
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    cap_add:
+      - SYS_ADMIN
     restart: unless-stopped
     networks:
       - zamos-network

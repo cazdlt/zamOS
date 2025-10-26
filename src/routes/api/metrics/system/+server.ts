@@ -2,6 +2,9 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import * as si from 'systeminformation';
 
+// Configure systeminformation to read from host system in Docker
+si.setConfigDir('/host/proc', '/host/sys');
+
 export const GET: RequestHandler = async () => {
 	try {
 		// Gather system metrics in parallel
