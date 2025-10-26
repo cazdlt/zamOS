@@ -10,47 +10,23 @@
 
 	interface Props {
 		app: App;
+		statusInfo?: {
+			status: 'online' | 'offline' | 'checking';
+			responseTime: number;
+		};
 		onEdit?: (app: App) => void;
 		onDelete?: (id: number) => void;
 	}
 
-	let { app, onEdit, onDelete }: Props = $props();
+	let { app, statusInfo, onEdit, onDelete }: Props = $props();
 
-	let currentStatus = $state<'online' | 'offline' | 'checking'>('checking');
-	let responseTime = $state<number>(0);
+	let currentStatus = $derived<'online' | 'offline' | 'checking'>(statusInfo?.status || 'checking');
+	let responseTime = $derived<number>(statusInfo?.responseTime || 0);
 
 	// Check if icon is a URL
 	function isIconUrl(icon: string): boolean {
 		return icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('/');
 	}
-
-	async function checkStatus() {
-		currentStatus = 'checking';
-		try {
-			const response = await fetch('/api/apps/status', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ url: app.url })
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				currentStatus = data.status;
-				responseTime = data.responseTime;
-			} else {
-				currentStatus = 'offline';
-			}
-		} catch {
-			currentStatus = 'offline';
-		}
-	}
-
-	// Check status on mount and every 30 seconds
-	$effect(() => {
-		checkStatus();
-		const interval = setInterval(checkStatus, 30000);
-		return () => clearInterval(interval);
-	});
 
 	function getStatusColor(status: string): string {
 		switch (status) {

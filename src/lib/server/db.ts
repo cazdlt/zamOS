@@ -1,10 +1,11 @@
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { eq } from 'drizzle-orm';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import { eq, count } from 'drizzle-orm';
 import Database from 'better-sqlite3';
 import { dev } from '$app/environment';
 import { existsSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
+import { apps, type App, type NewApp } from './schema';
 
 const dbPath = dev ? 'data/zamos.db' : '/data/zamos.db';
 
@@ -30,26 +31,10 @@ export const db = new Proxy({} as ReturnType<typeof drizzle>, {
 	}
 });
 
-// Schema
-export const apps = sqliteTable('apps', {
-	id: integer('id').primaryKey({ autoIncrement: true }),
-	name: text('name').notNull().unique(),
-	description: text('description').notNull(),
-	icon: text('icon').notNull(),
-	url: text('url').notNull(),
-	status: text('status', { enum: ['running', 'stopped', 'error'] }).notNull(),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
+// Re-export types
+export type { App, NewApp };
 
-export type App = typeof apps.$inferSelect;
-export type NewApp = typeof apps.$inferInsert;
-
-// Initialize database
+// Initialize database with migrations
 let initialized = false;
 
 export function initDb() {
@@ -57,70 +42,24 @@ export function initDb() {
 
 	const db = getDb();
 
-	sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS apps (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE,
-      description TEXT NOT NULL,
-      icon TEXT NOT NULL,
-      url TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('running', 'stopped', 'error')),
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    );
-  `);
+	// Run migrations
+	migrate(db, { migrationsFolder: './drizzle' });
+	console.log('✅ Database migrations applied');
 
 	// Seed data if table is empty
-	const count = sqlite.prepare('SELECT COUNT(*) as count FROM apps').get() as { count: number };
+	const result = db.select({ count: count() }).from(apps).get();
 
-	if (count.count === 0) {
-		const seedApps: NewApp[] = [
-			{
-				name: 'Plex',
-				description: 'Media Server',
-				icon: '🎬',
-				url: 'http://localhost:32400',
-				status: 'running'
-			},
-			{
-				name: 'Home Assistant',
-				description: 'Home Automation',
-				icon: '🏠',
-				url: 'http://localhost:8123',
-				status: 'running'
-			},
-			{
-				name: 'Nextcloud',
-				description: 'File Storage',
-				icon: '☁️',
-				url: 'http://localhost:8080',
-				status: 'running'
-			},
-			{
-				name: 'Pi-hole',
-				description: 'Ad Blocker',
-				icon: '🛡️',
-				url: 'http://localhost:80',
-				status: 'running'
-			},
-			{
-				name: 'Portainer',
-				description: 'Container Manager',
-				icon: '🐳',
-				url: 'http://localhost:9000',
-				status: 'running'
-			},
-			{
-				name: 'Jellyfin',
-				description: 'Media System',
-				icon: '📺',
-				url: 'http://localhost:8096',
-				status: 'stopped'
-			}
-		];
+	if (result && result.count === 0) {
+		const seedApp: NewApp = {
+			name: 'Example App',
+			description: 'Sample Application',
+			icon: '🚀',
+			url: 'http://localhost:3000',
+			status: 'running'
+		};
 
-		db.insert(apps).values(seedApps).run();
-		console.log('✅ Database seeded with 6 apps');
+		db.insert(apps).values(seedApp).run();
+		console.log('✅ Database seeded with sample app');
 	}
 
 	initialized = true;

@@ -73,6 +73,7 @@ The dashboard will be available at `http://localhost:5173`
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
 - **Build Tool**: [Vite 7](https://vitejs.dev/)
+- **Database**: [SQLite](https://www.sqlite.org/) with [Drizzle ORM](https://orm.drizzle.team/)
 
 ## Architecture
 
@@ -283,6 +284,43 @@ npm run check:watch
 | `npm run check` | Run type checking |
 | `npm run format` | Format with Prettier |
 | `npm run lint` | Lint with ESLint |
+| `npm run db:generate` | Generate database migrations |
+| `npm run db:migrate` | Run database migrations |
+| `npm run db:studio` | Open Drizzle Studio (database GUI) |
+
+## Database Management
+
+### Migrations
+
+The app uses Drizzle ORM with proper migration support. The database schema is defined in `src/lib/server/schema.ts`.
+
+**Generate a new migration after schema changes:**
+
+```bash
+npm run db:generate
+```
+
+**View database with Drizzle Studio:**
+
+```bash
+npm run db:studio
+```
+
+This opens a web interface at `https://local.drizzle.studio` where you can view and edit your database.
+
+### Schema Changes
+
+1. Edit the schema in `src/lib/server/schema.ts`
+2. Run `npm run db:generate` to create a migration file
+3. The migration will be automatically applied on app startup
+4. Migration files are stored in the `drizzle/` directory
+
+### Database Location
+
+- **Development**: `data/zamos.db`
+- **Production**: `/data/zamos.db`
+
+The database is automatically seeded with sample applications on first run.
 
 ## Deployment
 

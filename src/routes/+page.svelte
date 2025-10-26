@@ -1,7 +1,7 @@
 <script lang="ts">
 	import SystemStats from '$lib/components/SystemStats.svelte';
 	import AppCard from '$lib/components/AppCard.svelte';
-	import NetworkStats from '$lib/components/NetworkStats.svelte';
+
 	import AppModal from '$lib/components/AppModal.svelte';
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
@@ -10,12 +10,19 @@
 		data: PageData;
 	}
 
+	interface AppStatus {
+		url: string;
+		status: 'online' | 'offline' | 'checking';
+		responseTime: number;
+	}
+
 	let { data }: Props = $props();
 	let apps = $derived(data.apps);
 
 	let currentTime = $state(new Date());
 	let isModalOpen = $state(false);
 	let editingApp = $state<(typeof apps)[0] | null>(null);
+	let appStatuses = $state<Map<string, AppStatus>>(new Map());
 
 	// Update time every second
 	$effect(() => {
@@ -23,6 +30,59 @@
 			currentTime = new Date();
 		}, 1000);
 
+		return () => clearInterval(interval);
+	});
+
+	// Batch status checking for all apps
+	async function checkAllAppStatuses() {
+		if (apps.length === 0) return;
+
+		// Mark all as checking
+		const newStatuses = new Map(appStatuses);
+		apps.forEach((app) => {
+			newStatuses.set(app.url, {
+				url: app.url,
+				status: 'checking',
+				responseTime: 0
+			});
+		});
+		appStatuses = newStatuses;
+
+		try {
+			const urls = apps.map((app) => app.url);
+			const response = await fetch('/api/apps/status/batch', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ urls })
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				const newStatuses = new Map(appStatuses);
+				data.results.forEach((result: AppStatus) => {
+					newStatuses.set(result.url, result);
+				});
+				appStatuses = newStatuses;
+			}
+		} catch (error) {
+			console.error('Failed to check app statuses:', error);
+			// Mark all as offline on error
+			const newStatuses = new Map(appStatuses);
+			apps.forEach((app) => {
+				newStatuses.set(app.url, {
+					url: app.url,
+					status: 'offline',
+					responseTime: 0
+				});
+			});
+			appStatuses = newStatuses;
+		}
+	}
+
+	// Check status on mount and every 30 seconds
+	$effect(() => {
+		checkAllAppStatuses();
+		const interval = setInterval(checkAllAppStatuses, 30000);
 		return () => clearInterval(interval);
 	});
 
@@ -109,16 +169,8 @@
 	<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 		<!-- Metrics Section -->
 		<section class="mb-8">
-			<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-				<div>
-					<h2 class="text-xl font-semibold text-white mb-4">System Status</h2>
-					<SystemStats />
-				</div>
-				<div>
-					<h2 class="text-xl font-semibold text-white mb-4">Network Activity</h2>
-					<NetworkStats />
-				</div>
-			</div>
+			<h2 class="text-xl font-semibold text-white mb-4">System Status</h2>
+			<SystemStats />
 		</section>
 
 		<!-- Applications Section -->
@@ -142,7 +194,12 @@
 			</div>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 				{#each apps as app (app.id)}
-					<AppCard {app} onEdit={openEditModal} onDelete={handleDelete} />
+					<AppCard
+						{app}
+						statusInfo={appStatuses.get(app.url)}
+						onEdit={openEditModal}
+						onDelete={handleDelete}
+					/>
 				{/each}
 			</div>
 		</section>
