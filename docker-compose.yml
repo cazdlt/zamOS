@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  zamos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zamos-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    networks:
+      - zamos-network
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+networks:
+  zamos-network:
+    driver: bridge
