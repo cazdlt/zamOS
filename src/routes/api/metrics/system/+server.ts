@@ -12,7 +12,8 @@ export const GET: RequestHandler = async () => {
 			fsSize.find((disk) => disk.mount === '/' || disk.mount === '/app') || fsSize[0];
 
 		// Convert bytes to GB
-		const ramUsedGB = mem.used / (1024 * 1024 * 1024);
+		// buffcache includes active memory + buffers + cache (matches htop's displayed usage)
+		const ramUsedGB = mem.buffcache / (1024 * 1024 * 1024);
 		const ramTotalGB = mem.total / (1024 * 1024 * 1024);
 		const diskUsedGB = mainDisk ? mainDisk.used / (1024 * 1024 * 1024) : 0;
 		const diskTotalGB = mainDisk ? mainDisk.size / (1024 * 1024 * 1024) : 0;
