@@ -16,6 +16,8 @@ services:
       - /proc:/proc:ro
       - /sys:/sys:ro
     privileged: true
+    security_opt:
+      - apparmor=unconfined
     restart: unless-stopped
     networks:
       - zamos-network
