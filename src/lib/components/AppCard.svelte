@@ -8,20 +8,27 @@
 		status: 'running' | 'stopped' | 'error';
 	}
 
+	interface AppStatus {
+		url: string;
+		status: 'online' | 'offline' | 'checking';
+		responseTime: number;
+	}
+
 	interface Props {
 		app: App;
-		statusInfo?: {
-			status: 'online' | 'offline' | 'checking';
-			responseTime: number;
-		};
+		appStatuses: Record<string, AppStatus>;
 		onEdit?: (app: App) => void;
 		onDelete?: (id: number) => void;
 	}
 
-	let { app, statusInfo, onEdit, onDelete }: Props = $props();
+	let { app, appStatuses, onEdit, onDelete }: Props = $props();
 
-	let currentStatus = $derived<'online' | 'offline' | 'checking'>(statusInfo?.status || 'checking');
-	let responseTime = $derived<number>(statusInfo?.responseTime || 0);
+	let currentStatus = $derived.by(() => {
+		return appStatuses[app.url]?.status ?? 'checking';
+	});
+	let responseTime = $derived.by(() => {
+		return appStatuses[app.url]?.responseTime ?? 0;
+	});
 
 	// Check if icon is a URL
 	function isIconUrl(icon: string): boolean {

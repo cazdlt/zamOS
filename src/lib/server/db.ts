@@ -54,7 +54,7 @@ export function initDb() {
 			name: 'Example App',
 			description: 'Sample Application',
 			icon: '🚀',
-			url: 'http://localhost:3000',
+			url: 'https://example.com',
 			status: 'running'
 		};
 

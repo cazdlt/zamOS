@@ -8,6 +8,7 @@ echo "=========================="
 # Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m'
 
 APP_NAME="zamos-dashboard"
@@ -21,11 +22,20 @@ docker compose down
 echo -e "${YELLOW}🗑️  Removing old images...${NC}"
 docker rmi $APP_NAME 2>/dev/null || true
 
+echo -e "${BLUE}📦 Installing dependencies...${NC}"
+npm ci
+
+echo -e "${BLUE}🗄️  Running database migrations...${NC}"
+npm run db:migrate
+
 echo -e "${YELLOW}🔨 Building new image...${NC}"
 docker compose build --no-cache
 
 echo -e "${YELLOW}🚀 Starting containers...${NC}"
 docker compose up -d
+
+echo -e "${YELLOW}⏳ Waiting for container to be ready...${NC}"
+sleep 3
 
 echo -e "${YELLOW}🧹 Cleaning up unused images...${NC}"
 docker image prune -f
@@ -40,3 +50,5 @@ echo "  View logs:    docker compose logs -f"
 echo "  Stop:         docker compose down"
 echo "  Restart:      docker compose restart"
 echo "  Status:       docker compose ps"
+echo "  DB Studio:    npm run db:studio"
+echo ""

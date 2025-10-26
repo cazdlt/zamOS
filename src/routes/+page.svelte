@@ -22,7 +22,8 @@
 	let currentTime = $state(new Date());
 	let isModalOpen = $state(false);
 	let editingApp = $state<(typeof apps)[0] | null>(null);
-	let appStatuses = $state<Map<string, AppStatus>>(new Map());
+	let appStatuses = $state<Record<string, AppStatus>>({});
+	let statusUpdateKey = $state(0);
 
 	// Update time every second
 	$effect(() => {
@@ -38,13 +39,13 @@
 		if (apps.length === 0) return;
 
 		// Mark all as checking
-		const newStatuses = new Map(appStatuses);
+		const newStatuses: Record<string, AppStatus> = { ...appStatuses };
 		apps.forEach((app) => {
-			newStatuses.set(app.url, {
+			newStatuses[app.url] = {
 				url: app.url,
 				status: 'checking',
 				responseTime: 0
-			});
+			};
 		});
 		appStatuses = newStatuses;
 
@@ -58,30 +59,40 @@
 
 			if (response.ok) {
 				const data = await response.json();
-				const newStatuses = new Map(appStatuses);
+				const newStatuses: Record<string, AppStatus> = {};
 				data.results.forEach((result: AppStatus) => {
-					newStatuses.set(result.url, result);
+					newStatuses[result.url] = result;
 				});
 				appStatuses = newStatuses;
+				statusUpdateKey++;
 			}
 		} catch (error) {
 			console.error('Failed to check app statuses:', error);
 			// Mark all as offline on error
-			const newStatuses = new Map(appStatuses);
+			const newStatuses: Record<string, AppStatus> = { ...appStatuses };
 			apps.forEach((app) => {
-				newStatuses.set(app.url, {
+				newStatuses[app.url] = {
 					url: app.url,
 					status: 'offline',
 					responseTime: 0
-				});
+				};
 			});
 			appStatuses = newStatuses;
 		}
 	}
 
 	// Check status on mount and every 30 seconds
+	let mounted = $state(false);
+
 	$effect(() => {
-		checkAllAppStatuses();
+		if (!mounted && apps.length > 0) {
+			mounted = true;
+			checkAllAppStatuses();
+		}
+	});
+
+	$effect(() => {
+		if (!mounted) return;
 		const interval = setInterval(checkAllAppStatuses, 30000);
 		return () => clearInterval(interval);
 	});
@@ -194,12 +205,7 @@
 			</div>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 				{#each apps as app (app.id)}
-					<AppCard
-						{app}
-						statusInfo={appStatuses.get(app.url)}
-						onEdit={openEditModal}
-						onDelete={handleDelete}
-					/>
+					<AppCard {app} {appStatuses} onEdit={openEditModal} onDelete={handleDelete} />
 				{/each}
 			</div>
 		</section>
