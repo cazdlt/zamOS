@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SystemStats from '$lib/components/SystemStats.svelte';
 	import AppCard from '$lib/components/AppCard.svelte';
+	import { VERSION } from '$lib/index.js';
 
 	import AppModal from '$lib/components/AppModal.svelte';
 	import type { PageData } from './$types';
@@ -160,7 +161,7 @@
 	}
 </script>
 
-<div class="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+<div class="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
 	<!-- Header -->
 	<header class="sticky top-0 z-50 glass border-b border-white/10">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -210,6 +211,13 @@
 			</div>
 		</section>
 	</main>
+
+	<!-- Footer -->
+	<footer class="mt-auto pb-4">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center text-xs text-gray-500">zamOS v{VERSION}</div>
+		</div>
+	</footer>
 </div>
 
 <AppModal isOpen={isModalOpen} app={editingApp} onClose={closeModal} onSave={handleSave} />
