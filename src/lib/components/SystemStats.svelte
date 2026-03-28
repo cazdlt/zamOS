@@ -5,7 +5,6 @@
 		total?: number;
 		unit: string;
 		icon: string;
-		color: string;
 	}
 
 	interface SystemMetrics {
@@ -19,27 +18,24 @@
 
 	let stats = $state<StatData[]>([
 		{
-			label: 'CPU Usage',
+			label: 'CPU',
 			value: 0,
 			unit: '%',
-			icon: '⚡',
-			color: 'from-blue-500 to-cyan-500'
+			icon: '▓▓'
 		},
 		{
 			label: 'RAM',
 			value: 0,
 			total: 0,
-			unit: 'GB',
-			icon: '🧠',
-			color: 'from-purple-500 to-pink-500'
+			unit: 'MB',
+			icon: '◈◈'
 		},
 		{
-			label: 'Disk',
+			label: 'DSK',
 			value: 0,
 			total: 0,
 			unit: 'GB',
-			icon: '💾',
-			color: 'from-cyan-500 to-blue-500'
+			icon: '◉◉'
 		}
 	]);
 
@@ -49,14 +45,14 @@
 			if (response.ok) {
 				const data: SystemMetrics = await response.json();
 				stats = stats.map((stat) => {
-					if (stat.label === 'CPU Usage') {
-						return { ...stat, value: data.cpu };
+					if (stat.label === 'CPU') {
+						return { ...stat, value: Math.round(data.cpu) };
 					}
 					if (stat.label === 'RAM') {
-						return { ...stat, value: data.ramUsed, total: data.ramTotal };
+						return { ...stat, value: Math.round(data.ramUsed), total: Math.round(data.ramTotal) };
 					}
-					if (stat.label === 'Disk') {
-						return { ...stat, value: data.diskUsed, total: data.diskTotal };
+					if (stat.label === 'DSK') {
+						return { ...stat, value: Math.round(data.diskUsed), total: Math.round(data.diskTotal) };
 					}
 					return stat;
 				});
@@ -74,49 +70,63 @@
 	});
 
 	function getPercentage(stat: StatData): number {
-		if (stat.total) {
+		if (stat.total && stat.total > 0) {
 			return (stat.value / stat.total) * 100;
 		}
-		return stat.value;
+		return Math.min(stat.value, 100);
 	}
 
 	function getStatusColor(percentage: number): string {
-		if (percentage < 50) return 'bg-green-500';
-		if (percentage < 80) return 'bg-yellow-500';
-		return 'bg-red-500';
+		if (percentage < 50) return 'var(--nes-lime)';
+		if (percentage < 80) return 'var(--nes-yellow)';
+		return 'var(--nes-red)';
+	}
+
+	function formatValue(value: number): string {
+		return value.toString().padStart(3, ' ');
 	}
 </script>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-	{#each stats as stat (stat.label)}
-		<div class="glass rounded-xl p-4 transition-all duration-300 glass-hover">
-			<div class="flex items-center gap-2 mb-3">
-				<span class="text-xl">{stat.icon}</span>
-				<span class="text-xs font-medium text-gray-400 uppercase tracking-wider">
-					{stat.label}
-				</span>
-			</div>
-			<div class="mb-3">
-				<span class="text-2xl font-bold text-white tabular-nums">
-					{stat.value}{stat.unit}
-				</span>
-				{#if stat.total}
-					<span class="text-lg text-gray-600 font-normal ml-1">
-						/ {stat.total}{stat.unit}
-					</span>
-				{/if}
-			</div>
-			<div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-1.5">
-				<div
-					class="h-full transition-all duration-500 rounded-full {getStatusColor(
-						getPercentage(stat)
-					)}"
-					style="width: {getPercentage(stat)}%"
-				></div>
-			</div>
-			<div class="text-xs text-gray-500 text-right tabular-nums">
-				{getPercentage(stat).toFixed(1)}%
-			</div>
+<div class="card-mac p-0 overflow-hidden">
+	<!-- Window Title Bar -->
+	<div class="window-title flex items-center justify-between">
+		<span class="font-system">System Status Monitor</span>
+		<div class="w-2 h-2 bg-nes-lime animate-pulse-pixel"></div>
+	</div>
+
+	<!-- Stats Grid - Mac Style -->
+	<div class="p-4 bg-mac-dark dither-mac">
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+			{#each stats as stat (stat.label)}
+				<div class="card-mac-inset p-3">
+					<!-- Header with Icon -->
+					<div class="flex items-center justify-between mb-2">
+						<div class="flex items-center gap-2">
+							<span class="font-system text-[10px] text-nes-cyan">{stat.icon}</span>
+							<span class="font-system text-mac-primary">{stat.label}</span>
+						</div>
+						<div class="font-terminal text-sm">
+							<span class="text-nes-cyan phosphor-glow">{formatValue(stat.value)}</span>
+							<span class="text-mac-muted">{stat.unit}</span>
+							{#if stat.total}
+								<span class="text-mac-muted">/{formatValue(stat.total)}</span>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Progress Bar - Mac Style -->
+					<div class="progress-mac progress-mac-sm">
+						<div
+							class="progress-mac-fill h-full transition-all duration-300"
+							style="width: {getPercentage(
+								stat
+							)}%; background: linear-gradient(180deg, {getStatusColor(
+								getPercentage(stat)
+							)} 0%, var(--nes-teal) 100%)"
+						></div>
+					</div>
+				</div>
+			{/each}
 		</div>
-	{/each}
+	</div>
 </div>

@@ -26,12 +26,10 @@
 
 	let errors = $state<Record<string, string>>({});
 
-	// Check if icon is a URL
 	function isIconUrl(icon: string): boolean {
 		return icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('/');
 	}
 
-	// Reset form when modal opens/closes or app changes
 	$effect(() => {
 		if (isOpen && app) {
 			formData = {
@@ -55,21 +53,21 @@
 		const newErrors: Record<string, string> = {};
 
 		if (!formData.name.trim()) {
-			newErrors.name = 'Name is required';
+			newErrors.name = 'REQUIRED!';
 		}
 
 		if (!formData.description.trim()) {
-			newErrors.description = 'Description is required';
+			newErrors.description = 'REQUIRED!';
 		}
 
 		if (!formData.icon.trim()) {
-			newErrors.icon = 'Icon is required (emoji or URL)';
+			newErrors.icon = 'REQUIRED!';
 		}
 
 		if (!formData.url.trim()) {
-			newErrors.url = 'URL is required';
+			newErrors.url = 'REQUIRED!';
 		} else if (!formData.url.startsWith('http://') && !formData.url.startsWith('https://')) {
-			newErrors.url = 'URL must start with http:// or https://';
+			newErrors.url = 'NEEDS HTTP:// OR HTTPS://';
 		}
 
 		errors = newErrors;
@@ -110,130 +108,125 @@
 
 {#if isOpen}
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+		class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-mac-backdrop"
 		onclick={handleBackdropClick}
 		onkeydown={handleBackdropKeydown}
 		role="button"
 		tabindex="0"
 	>
-		<div class="glass rounded-2xl p-6 max-w-md w-full shadow-2xl">
-			<div class="flex items-center justify-between mb-6">
-				<h2 class="text-2xl font-bold text-white">
-					{app ? 'Edit Application' : 'Add Application'}
-				</h2>
-				<button
-					onclick={onClose}
-					class="text-gray-400 hover:text-white transition-colors p-1"
-					aria-label="Close"
-				>
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				</button>
+		<div class="window-chrome max-w-md w-full">
+			<!-- Window Title Bar - Mac Style -->
+			<div class="window-title-active flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<button onclick={onClose} class="mac-close-btn" aria-label="Close"></button>
+					<span>{app ? 'Edit Application' : 'New Application'}</span>
+				</div>
 			</div>
 
-			<form onsubmit={handleSubmit} class="space-y-4">
-				<!-- Name -->
-				<div>
-					<label for="name" class="block text-sm font-medium text-gray-300 mb-2">Name</label>
-					<input
-						type="text"
-						id="name"
-						bind:value={formData.name}
-						class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-						placeholder="Plex"
-					/>
-					{#if errors.name}
-						<p class="text-red-400 text-sm mt-1">{errors.name}</p>
-					{/if}
-				</div>
+			<!-- Form Content -->
+			<div class="p-6 bg-mac-dark">
+				<form onsubmit={handleSubmit} class="space-y-4">
+					<!-- Name -->
+					<div>
+						<label for="name" class="font-system text-xs text-nes-cyan mb-2 block uppercase">
+							Name
+						</label>
+						<input
+							type="text"
+							id="name"
+							bind:value={formData.name}
+							class="input-mac w-full"
+							placeholder="APP NAME"
+						/>
+						{#if errors.name}
+							<p class="text-nes-red font-system text-xs mt-1 uppercase">
+								{errors.name}
+							</p>
+						{/if}
+					</div>
 
-				<!-- Description -->
-				<div>
-					<label for="description" class="block text-sm font-medium text-gray-300 mb-2"
-						>Description</label
-					>
-					<input
-						type="text"
-						id="description"
-						bind:value={formData.description}
-						class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-						placeholder="Media Server"
-					/>
-					{#if errors.description}
-						<p class="text-red-400 text-sm mt-1">{errors.description}</p>
-					{/if}
-				</div>
+					<!-- Description -->
+					<div>
+						<label for="description" class="font-system text-xs text-nes-cyan mb-2 block uppercase">
+							Description
+						</label>
+						<input
+							type="text"
+							id="description"
+							bind:value={formData.description}
+							class="input-mac w-full"
+							placeholder="WHAT IT DOES"
+						/>
+						{#if errors.description}
+							<p class="text-nes-red font-system text-xs mt-1 uppercase">
+								{errors.description}
+							</p>
+						{/if}
+					</div>
 
-				<!-- Icon -->
-				<div>
-					<label for="icon" class="block text-sm font-medium text-gray-300 mb-2"
-						>Icon (Emoji or URL)</label
-					>
-					<input
-						type="text"
-						id="icon"
-						bind:value={formData.icon}
-						class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-						placeholder="🎬 or https://example.com/icon.png"
-					/>
-					{#if errors.icon}
-						<p class="text-red-400 text-sm mt-1">{errors.icon}</p>
-					{:else}
-						<p class="text-gray-400 text-xs mt-1">
-							Use an emoji (🎬) or an image URL (https://...)
-						</p>
-					{/if}
-					{#if formData.icon && isIconUrl(formData.icon)}
-						<div class="mt-2 flex items-center gap-2">
-							<span class="text-sm text-gray-400">Preview:</span>
-							<img src={formData.icon} alt="Icon preview" class="w-8 h-8 object-contain" />
-						</div>
-					{:else if formData.icon}
-						<div class="mt-2 flex items-center gap-2">
-							<span class="text-sm text-gray-400">Preview:</span>
-							<span class="text-2xl">{formData.icon}</span>
-						</div>
-					{/if}
-				</div>
+					<!-- Icon -->
+					<div>
+						<label for="icon" class="font-system text-xs text-nes-cyan mb-2 block uppercase">
+							Icon (Emoji or URL)
+						</label>
+						<input
+							type="text"
+							id="icon"
+							bind:value={formData.icon}
+							class="input-mac w-full"
+							placeholder="🎬 OR HTTPS://..."
+						/>
+						{#if errors.icon}
+							<p class="text-nes-red font-system text-xs mt-1 uppercase">
+								{errors.icon}
+							</p>
+						{/if}
 
-				<!-- URL -->
-				<div>
-					<label for="url" class="block text-sm font-medium text-gray-300 mb-2">URL</label>
-					<input
-						type="url"
-						id="url"
-						bind:value={formData.url}
-						class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-						placeholder="http://localhost:32400"
-					/>
-					{#if errors.url}
-						<p class="text-red-400 text-sm mt-1">{errors.url}</p>
-					{/if}
-				</div>
+						<!-- Icon Preview -->
+						{#if formData.icon}
+							<div class="mt-2 flex items-center gap-2 p-2 card-mac-inset">
+								<span class="font-system text-[10px] text-mac-secondary">PREVIEW:</span>
+								{#if isIconUrl(formData.icon)}
+									<img src={formData.icon} alt="Preview" class="w-8 h-8 object-contain" />
+								{:else}
+									<span class="text-2xl">{formData.icon}</span>
+								{/if}
+							</div>
+						{/if}
+					</div>
 
-				<!-- Actions -->
-				<div class="flex gap-3 pt-4">
-					<button
-						type="button"
-						onclick={onClose}
-						class="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-medium transition-colors"
-					>
-						Cancel
-					</button>
-					<button
-						type="submit"
-						class="flex-1 px-4 py-2 bg-primary-500 hover:bg-primary-600 rounded-lg text-white font-medium transition-colors"
-					>
-						{app ? 'Update' : 'Add'}
-					</button>
-				</div>
-			</form>
+					<!-- URL -->
+					<div>
+						<label for="url" class="font-system text-xs text-nes-cyan mb-2 block uppercase">
+							URL
+						</label>
+						<input
+							type="url"
+							id="url"
+							bind:value={formData.url}
+							class="input-mac w-full"
+							placeholder="HTTP://LOCALHOST:3000"
+						/>
+						{#if errors.url}
+							<p class="text-nes-red font-system text-xs mt-1 uppercase">
+								{errors.url}
+							</p>
+						{/if}
+					</div>
+
+					<!-- Actions -->
+					<div class="flex gap-3 pt-4 border-t-2 border-mac-platinum-dark">
+						<button type="button" onclick={onClose} class="btn-mac flex-1"> CANCEL </button>
+						<button
+							type="submit"
+							class="btn-mac flex-1"
+							style="background: linear-gradient(180deg, rgba(0, 229, 255, 0.2) 0%, rgba(0, 229, 255, 0.1) 100%); border-color: var(--nes-cyan) var(--mac-shadow) var(--mac-shadow) var(--nes-cyan); color: var(--nes-cyan); text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);"
+						>
+							{app ? 'UPDATE' : 'CREATE'}
+						</button>
+					</div>
+				</form>
+			</div>
 		</div>
 	</div>
 {/if}

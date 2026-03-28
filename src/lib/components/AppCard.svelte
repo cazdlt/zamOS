@@ -30,7 +30,6 @@
 		return appStatuses[app.url]?.responseTime ?? 0;
 	});
 
-	// Check if icon is a URL
 	function isIconUrl(icon: string): boolean {
 		return icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('/');
 	}
@@ -38,49 +37,91 @@
 	function getStatusColor(status: string): string {
 		switch (status) {
 			case 'online':
-				return 'bg-green-500';
+				return 'var(--nes-lime)';
 			case 'offline':
-				return 'bg-red-500';
+				return 'var(--nes-red)';
 			case 'checking':
-				return 'bg-yellow-500';
+				return 'var(--nes-yellow)';
 			default:
-				return 'bg-gray-500';
-		}
-	}
-
-	function getStatusTextColor(status: string): string {
-		switch (status) {
-			case 'online':
-				return 'text-green-400';
-			case 'offline':
-				return 'text-red-400';
-			case 'checking':
-				return 'text-yellow-400';
-			default:
-				return 'text-gray-400';
+				return 'var(--text-muted)';
 		}
 	}
 
 	function getStatusLabel(status: string): string {
 		switch (status) {
 			case 'online':
-				return responseTime > 0 ? `Online (${responseTime}ms)` : 'Online';
+				return responseTime > 0 ? `ON [${responseTime}ms]` : 'ONLINE';
 			case 'offline':
-				return 'Offline';
+				return 'OFFLINE';
 			case 'checking':
-				return 'Checking...';
+				return 'CHECK...';
 			default:
-				return 'Unknown';
+				return '???';
 		}
+	}
+
+	function truncateName(name: string): string {
+		if (name.length > 12) {
+			return name.substring(0, 11) + '..';
+		}
+		return name.padEnd(12, ' ');
+	}
+
+	function truncateDescription(desc: string): string {
+		if (desc.length > 18) {
+			return desc.substring(0, 17) + '..';
+		}
+		return desc;
 	}
 </script>
 
 <div
-	class="glass rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 glass-hover group relative"
+	class="card-mac group relative overflow-hidden cursor-pointer hover:bg-mac-medium transition-all duration-150"
 >
-	<!-- Action buttons -->
+	<!-- Inner Inset Area for Content -->
+	<div class="card-mac-inset m-2 p-4 min-h-[180px] flex flex-col">
+		<!-- Icon Area - NES Style -->
+		<div class="flex-1 flex items-center justify-center mb-3">
+			{#if isIconUrl(app.icon)}
+				<div class="w-14 h-14 border-mac-inset bg-mac-deep flex items-center justify-center p-2">
+					<img src={app.icon} alt={app.name} class="w-full h-full object-contain" />
+				</div>
+			{:else}
+				<div class="text-5xl animate-pulse-pixel text-nes-cyan">{app.icon}</div>
+			{/if}
+		</div>
+
+		<!-- Info Area -->
+		<div class="text-center mb-3">
+			<h3 class="font-system text-xs mb-1 text-mac-primary uppercase tracking-wider">
+				{truncateName(app.name)}
+			</h3>
+			<p class="font-terminal text-mac-secondary leading-tight">
+				{truncateDescription(app.description)}
+			</p>
+		</div>
+
+		<!-- Status Area - NES Pixel Style -->
+		<div class="border-t-2 border-mac-platinum-dark pt-3 mt-auto">
+			<div class="flex items-center justify-center gap-2">
+				<div
+					class="status-dot {currentStatus === 'online'
+						? 'status-online'
+						: currentStatus === 'offline'
+							? 'status-offline'
+							: 'status-checking'}"
+					class:animate-blink={currentStatus === 'checking'}
+				></div>
+				<span class="font-system text-[10px]" style="color: {getStatusColor(currentStatus)}">
+					{getStatusLabel(currentStatus)}
+				</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Action Buttons - Mac Style -->
 	<div
-		class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+		class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
 	>
 		{#if onEdit}
 			<button
@@ -88,73 +129,32 @@
 					e.stopPropagation();
 					onEdit(app);
 				}}
-				class="p-1.5 bg-blue-500/80 hover:bg-blue-500 rounded-lg text-white transition-colors"
+				class="w-6 h-6 bg-mac-medium border border-mac-platinum flex items-center justify-center text-mac-secondary text-[10px] font-system hover:bg-nes-orange hover:text-mac-deep hover:border-nes-orange transition-colors"
 				aria-label="Edit"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-					/>
-				</svg>
+				E
 			</button>
 		{/if}
 		{#if onDelete && app.id}
 			<button
 				onclick={(e) => {
 					e.stopPropagation();
-					if (confirm(`Delete ${app.name}?`)) {
+					if (confirm(`DELETE ${app.name}?`)) {
 						onDelete(app.id!);
 					}
 				}}
-				class="p-1.5 bg-red-500/80 hover:bg-red-500 rounded-lg text-white transition-colors"
+				class="w-6 h-6 bg-mac-medium border border-mac-platinum flex items-center justify-center text-mac-secondary text-[10px] font-system hover:bg-nes-red hover:text-mac-deep hover:border-nes-red transition-colors"
 				aria-label="Delete"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-					/>
-				</svg>
+				X
 			</button>
 		{/if}
 	</div>
 
-	<!-- App content - clickable -->
+	<!-- Click Handler Overlay -->
 	<button
 		onclick={() => window.open(app.url, '_blank', 'noopener,noreferrer')}
-		class="flex flex-col gap-4 text-left w-full bg-transparent border-none p-0 cursor-pointer"
-	>
-		<div class="text-center mb-2 group-hover:scale-110 transition-transform duration-300">
-			{#if isIconUrl(app.icon)}
-				<img src={app.icon} alt={app.name} class="w-16 h-16 mx-auto object-contain" />
-			{:else}
-				<span class="text-5xl">{app.icon}</span>
-			{/if}
-		</div>
-		<div class="flex-1 text-center">
-			<h3 class="m-0 mb-2 text-xl font-semibold text-white">
-				{app.name}
-			</h3>
-			<p class="m-0 text-sm text-gray-400">
-				{app.description}
-			</p>
-		</div>
-		<div class="flex items-center justify-center gap-2 pt-3 border-t border-white/10">
-			<span
-				class="w-2 h-2 rounded-full {getStatusColor(currentStatus)} {currentStatus === 'checking'
-					? 'animate-pulse'
-					: ''}"
-			></span>
-			<span
-				class="text-xs font-medium uppercase tracking-wider {getStatusTextColor(currentStatus)}"
-			>
-				{getStatusLabel(currentStatus)}
-			</span>
-		</div>
-	</button>
+		class="absolute inset-0 bg-transparent border-none cursor-pointer"
+		aria-label="Open {app.name}"
+	></button>
 </div>

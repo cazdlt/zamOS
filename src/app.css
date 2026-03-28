@@ -1,4 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap');
 @import 'tailwindcss';
+
+/* Early Mac + NES on CRT Theme v1.1.0 */
+:root {
+	/* Mac Platinum Dark Mode Palette */
+	--mac-bg-deep: #1a1a1a;
+	--mac-bg-dark: #252525;
+	--mac-bg-medium: #303030;
+	--mac-bg-light: #3a3a3a;
+	--mac-bg-lighter: #454545;
+
+	/* Platinum Grays for 3D borders */
+	--mac-platinum-light: #666666;
+	--mac-platinum: #555555;
+	--mac-platinum-dark: #333333;
+	--mac-platinum-darker: #222222;
+	--mac-shadow: #0a0a0a;
+	--mac-highlight: #888888;
+
+	/* NES Color Palette */
+	--nes-red: #e40058;
+	--nes-red-glow: #ff1464;
+	--nes-orange: #ff8800;
+	--nes-yellow: #ffd700;
+	--nes-lime: #7fff00;
+	--nes-green: #00c853;
+	--nes-teal: #00b8d4;
+	--nes-cyan: #00e5ff;
+	--nes-blue: #2962ff;
+	--nes-purple: #aa00ff;
+	--nes-pink: #ff4081;
+
+	/* Text Colors - Improved contrast */
+	--text-primary: #ffffff;
+	--text-secondary: #e0e0e0;
+	--text-tertiary: #b0b0b0;
+	--text-muted: #888888;
+	--text-dim: #606060;
+
+	/* Glow Effects */
+	--glow-subtle: 0 0 2px;
+	--glow-soft: 0 0 5px;
+	--glow-medium: 0 0 10px;
+}
 
 @layer base {
 	* {
@@ -12,74 +56,637 @@
 	body {
 		margin: 0;
 		padding: 0;
-		background: #030712;
-		color: #e5e7eb;
-		font-family:
-			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans',
-			'Droid Sans', 'Helvetica Neue', sans-serif;
+		background: var(--mac-bg-deep);
+		color: var(--text-secondary);
+		font-family: 'VT323', 'Courier New', monospace;
+		font-size: 18px;
+		line-height: 1.5;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		overflow-x: hidden;
+		image-rendering: pixelated;
+	}
+
+	/* CRT Scanlines - Softer intensity */
+	body::before {
+		content: '';
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: repeating-linear-gradient(
+			0deg,
+			rgba(0, 0, 0, 0.35),
+			rgba(0, 0, 0, 0.35) 1px,
+			transparent 1px,
+			transparent 2px
+		);
+		pointer-events: none;
+		z-index: 9999;
+	}
+
+	/* CRT Vignette - Barrel distortion feel */
+	body::after {
+		content: '';
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: radial-gradient(
+			ellipse at center,
+			transparent 0%,
+			transparent 60%,
+			rgba(0, 0, 0, 0.35) 85%,
+			rgba(0, 0, 0, 0.6) 100%
+		);
+		pointer-events: none;
+		z-index: 9998;
+	}
+
+	/* Chromatic Aberration - RGB split at edges */
+	.app-container {
+		position: relative;
+	}
+
+	.app-container::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: inherit;
+		pointer-events: none;
+		z-index: 9997;
+		mix-blend-mode: screen;
+		filter: url('#chromatic-aberration');
+		opacity: 0.08;
 	}
 }
 
 @layer utilities {
-	.text-gradient {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+	/* System Font - Press Start 2P for headers */
+	.font-system {
+		font-family: 'Press Start 2P', sans-serif;
+		font-weight: 400;
+		letter-spacing: 0.04em;
+		font-size: 0.85em;
+		text-transform: uppercase;
+		line-height: 1.8;
 	}
 
-	.bg-primary-500 {
-		background-color: #667eea;
+	.font-system-sm {
+		font-family: 'Press Start 2P', sans-serif;
+		font-size: 0.7em;
+		letter-spacing: 0.06em;
+		line-height: 1.6;
 	}
 
-	.bg-primary-600 {
-		background-color: #5568d3;
+	/* Body Font - VT323 Terminal */
+	.font-terminal {
+		font-family: 'VT323', 'Courier New', monospace;
+		font-size: 1.25em;
+		letter-spacing: 0.02em;
+		line-height: 1.4;
 	}
 
-	.hover\:bg-primary-600:hover {
-		background-color: #5568d3;
+	/* Mac Platinum Backgrounds */
+	.bg-mac-deep {
+		background-color: var(--mac-bg-deep);
 	}
 
-	.focus\:border-primary-500:focus {
-		border-color: #667eea;
+	.bg-mac-dark {
+		background-color: var(--mac-bg-dark);
 	}
 
-	.focus\:ring-primary-500:focus {
-		--tw-ring-color: #667eea;
+	.bg-mac-medium {
+		background-color: var(--mac-bg-medium);
 	}
 
-	.glass {
-		background: rgba(255, 255, 255, 0.05);
-		backdrop-filter: blur(12px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+	.bg-mac-light {
+		background-color: var(--mac-bg-light);
 	}
 
-	.glass-hover {
-		transition: all 0.3s ease;
+	.bg-mac-lighter {
+		background-color: var(--mac-bg-lighter);
 	}
 
-	.glass-hover:hover {
-		background: rgba(255, 255, 255, 0.08);
-		border-color: rgba(255, 255, 255, 0.2);
-		transform: translateY(-4px);
+	/* NES Color Utilities - Improved contrast */
+	.text-nes-red {
+		color: var(--nes-red);
+		text-shadow: var(--glow-soft) rgba(228, 0, 88, 0.6);
+	}
+
+	.text-nes-orange {
+		color: var(--nes-orange);
+		text-shadow: var(--glow-soft) rgba(255, 136, 0, 0.5);
+	}
+
+	.text-nes-yellow {
+		color: var(--nes-yellow);
+		text-shadow: var(--glow-soft) rgba(255, 215, 0, 0.5);
+	}
+
+	.text-nes-lime {
+		color: var(--nes-lime);
+		text-shadow: var(--glow-soft) rgba(127, 255, 0, 0.5);
+	}
+
+	.text-nes-green {
+		color: var(--nes-green);
+		text-shadow: var(--glow-soft) rgba(0, 200, 83, 0.5);
+	}
+
+	.text-nes-teal {
+		color: var(--nes-teal);
+		text-shadow: var(--glow-soft) rgba(0, 184, 212, 0.5);
+	}
+
+	.text-nes-cyan {
+		color: var(--nes-cyan);
+		text-shadow: var(--glow-soft) rgba(0, 229, 255, 0.6);
+	}
+
+	.text-nes-blue {
+		color: var(--nes-blue);
+		text-shadow: var(--glow-soft) rgba(41, 98, 255, 0.5);
+	}
+
+	.text-nes-purple {
+		color: var(--nes-purple);
+		text-shadow: var(--glow-soft) rgba(170, 0, 255, 0.5);
+	}
+
+	.text-nes-pink {
+		color: var(--nes-pink);
+		text-shadow: var(--glow-soft) rgba(255, 64, 129, 0.5);
+	}
+
+	/* Background versions */
+	.bg-nes-red {
+		background-color: var(--nes-red);
+	}
+	.bg-nes-orange {
+		background-color: var(--nes-orange);
+	}
+	.bg-nes-yellow {
+		background-color: var(--nes-yellow);
+	}
+	.bg-nes-lime {
+		background-color: var(--nes-lime);
+	}
+	.bg-nes-green {
+		background-color: var(--nes-green);
+	}
+	.bg-nes-cyan {
+		background-color: var(--nes-cyan);
+	}
+	.bg-nes-blue {
+		background-color: var(--nes-blue);
+	}
+	.bg-nes-purple {
+		background-color: var(--nes-purple);
+	}
+
+	/* Text Colors - Improved contrast */
+	.text-mac-primary {
+		color: var(--text-primary);
+	}
+
+	.text-mac-secondary {
+		color: var(--text-secondary);
+	}
+
+	.text-mac-tertiary {
+		color: var(--text-tertiary);
+	}
+
+	.text-mac-muted {
+		color: var(--text-muted);
+	}
+
+	.text-mac-dim {
+		color: var(--text-dim);
+	}
+
+	/* Mac Platinum Window Chrome - Classic 3D Look */
+	.window-chrome {
+		background: linear-gradient(
+			180deg,
+			var(--mac-bg-light) 0%,
+			var(--mac-bg-medium) 50%,
+			var(--mac-bg-dark) 100%
+		);
+		border: 2px solid;
+		border-color: var(--mac-platinum-light) var(--mac-shadow) var(--mac-shadow)
+			var(--mac-platinum-light);
 		box-shadow:
-			0 20px 25px -5px rgba(0, 0, 0, 0.3),
-			0 10px 10px -5px rgba(0, 0, 0, 0.2);
+			3px 3px 0 var(--mac-shadow),
+			0 0 20px rgba(0, 0, 0, 0.5);
+		border-radius: 0;
+	}
+
+	/* Classic Mac Title Bar */
+	.window-title {
+		background: linear-gradient(
+			180deg,
+			var(--mac-bg-lighter) 0%,
+			var(--mac-bg-light) 50%,
+			var(--mac-bg-medium) 100%
+		);
+		color: var(--text-primary);
+		font-family: 'Press Start 2P', sans-serif;
+		font-size: 0.75em;
+		padding: 8px 12px;
+		text-align: center;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		border-bottom: 2px solid;
+		border-color: var(--mac-platinum-dark) var(--mac-shadow) var(--mac-shadow)
+			var(--mac-platinum-dark);
+	}
+
+	/* Active Window Title Bar */
+	.window-title-active {
+		background: linear-gradient(180deg, var(--nes-blue) 0%, var(--nes-teal) 100%);
+		color: var(--text-primary);
+		text-shadow: var(--glow-soft) rgba(255, 255, 255, 0.5);
+		border-bottom: 2px solid;
+		border-color: var(--nes-cyan) var(--mac-shadow) var(--mac-shadow) var(--nes-cyan);
+		font-family: 'Press Start 2P', sans-serif;
+		font-size: 0.75em;
+		padding: 8px 12px;
+		text-align: center;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	/* Classic Mac 3D Borders */
+	.border-mac-3d {
+		border: 2px solid;
+		border-color: var(--mac-platinum-light) var(--mac-shadow) var(--mac-shadow)
+			var(--mac-platinum-light);
+		box-shadow:
+			inset -1px -1px 0 var(--mac-bg-deep),
+			inset 1px 1px 0 var(--mac-platinum);
+	}
+
+	.border-mac-inset {
+		border: 2px solid;
+		border-color: var(--mac-shadow) var(--mac-platinum) var(--mac-platinum) var(--mac-shadow);
+		box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.4);
+		background: var(--mac-bg-deep);
+	}
+
+	.border-mac-outset {
+		border: 2px solid;
+		border-color: var(--mac-platinum) var(--mac-shadow) var(--mac-shadow) var(--mac-platinum);
+		box-shadow:
+			inset -1px -1px 0 var(--mac-bg-deep),
+			0 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	/* Close Button - Classic Mac Style */
+	.mac-close-btn {
+		width: 14px;
+		height: 14px;
+		background: var(--nes-red);
+		border: 2px solid;
+		border-color: var(--mac-platinum-light) var(--mac-shadow) var(--mac-shadow)
+			var(--mac-platinum-light);
+		border-radius: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 10px;
+		font-weight: bold;
+		cursor: pointer;
+		color: var(--mac-shadow);
+		transition: all 0.1s;
+		box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.3);
+	}
+
+	.mac-close-btn:hover {
+		background: var(--nes-red-glow);
+		box-shadow:
+			inset 1px 1px 0 rgba(255, 255, 255, 0.3),
+			0 0 8px rgba(228, 0, 88, 0.6);
+	}
+
+	.mac-close-btn:active {
+		border-color: var(--mac-shadow) var(--mac-platinum-light) var(--mac-platinum-light)
+			var(--mac-shadow);
+		transform: translate(1px, 1px);
+	}
+
+	/* Mac Style Buttons */
+	.btn-mac {
+		background: linear-gradient(180deg, var(--mac-bg-light) 0%, var(--mac-bg-medium) 100%);
+		border: 2px solid;
+		border-color: var(--mac-platinum) var(--mac-shadow) var(--mac-shadow) var(--mac-platinum);
+		box-shadow:
+			2px 2px 0 var(--mac-shadow),
+			inset 0 1px 0 rgba(255, 255, 255, 0.1);
+		color: var(--text-primary);
+		font-family: 'Press Start 2P', sans-serif;
+		font-size: 0.65em;
+		padding: 12px 16px;
+		cursor: pointer;
+		transition: all 0.1s;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		border-radius: 0;
+		line-height: 1.6;
+	}
+
+	.btn-mac:hover {
+		background: linear-gradient(180deg, var(--mac-bg-lighter) 0%, var(--mac-bg-light) 100%);
+		border-color: var(--mac-platinum-light) var(--mac-shadow) var(--mac-shadow)
+			var(--mac-platinum-light);
+	}
+
+	.btn-mac:active {
+		border-color: var(--mac-shadow) var(--mac-platinum) var(--mac-platinum) var(--mac-shadow);
+		box-shadow:
+			inset 1px 1px 2px rgba(0, 0, 0, 0.5),
+			1px 1px 0 var(--mac-shadow);
+		transform: translate(1px, 1px);
+	}
+
+	/* NES Accent Button */
+	.btn-nes {
+		background: var(--mac-bg-medium);
+		border: 2px solid;
+		border-color: var(--nes-cyan) var(--mac-shadow) var(--mac-shadow) var(--nes-cyan);
+		color: var(--nes-cyan);
+		box-shadow:
+			2px 2px 0 var(--mac-shadow),
+			0 0 10px rgba(0, 229, 255, 0.2);
+		text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+	}
+
+	.btn-nes:hover {
+		background: var(--mac-bg-light);
+		border-color: var(--nes-cyan) var(--mac-shadow) var(--mac-shadow) var(--nes-cyan);
+		box-shadow:
+			2px 2px 0 var(--mac-shadow),
+			0 0 15px rgba(0, 229, 255, 0.3);
+		text-shadow: 0 0 8px rgba(0, 229, 255, 0.7);
+	}
+
+	/* Mac Style Cards */
+	.card-mac {
+		background: var(--mac-bg-dark);
+		border: 2px solid;
+		border-color: var(--mac-platinum-light) var(--mac-shadow) var(--mac-shadow)
+			var(--mac-platinum-light);
+		box-shadow:
+			3px 3px 0 var(--mac-shadow),
+			0 0 0 1px rgba(0, 0, 0, 0.2);
+		border-radius: 0;
+		position: relative;
+	}
+
+	.card-mac-inset {
+		background: var(--mac-bg-deep);
+		border: 2px solid;
+		border-color: var(--mac-shadow) var(--mac-platinum) var(--mac-platinum) var(--mac-shadow);
+		box-shadow:
+			inset 1px 1px 3px rgba(0, 0, 0, 0.5),
+			inset -1px -1px 0 rgba(255, 255, 255, 0.02);
+		border-radius: 0;
+	}
+
+	/* Mac Input Fields */
+	.input-mac {
+		background: var(--mac-bg-deep);
+		border: 2px solid;
+		border-color: var(--mac-shadow) var(--mac-platinum) var(--mac-platinum) var(--mac-shadow);
+		font-family: 'VT323', monospace;
+		font-size: 1.2em;
+		padding: 10px 14px;
+		color: var(--nes-cyan);
+		transition: all 0.15s;
+		box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.5);
+		border-radius: 0;
+		line-height: 1.4;
+	}
+
+	.input-mac::placeholder {
+		color: var(--text-muted);
+		opacity: 1;
+	}
+
+	.input-mac:focus {
+		outline: none;
+		border-color: var(--nes-cyan) var(--mac-platinum) var(--mac-platinum) var(--nes-cyan);
+		background: var(--mac-bg-deep);
+		box-shadow:
+			inset 1px 1px 3px rgba(0, 0, 0, 0.5),
+			0 0 8px rgba(0, 229, 255, 0.3);
+	}
+
+	/* Status Indicators - NES Colors */
+	.status-dot {
+		width: 10px;
+		height: 10px;
+		border: 2px solid;
+		border-color: var(--mac-shadow) var(--mac-platinum) var(--mac-platinum) var(--mac-shadow);
+		border-radius: 0;
+		transition: all 0.3s;
+	}
+
+	.status-online {
+		background: var(--nes-lime);
+		box-shadow:
+			0 0 10px rgba(127, 255, 0, 0.8),
+			0 0 18px rgba(127, 255, 0, 0.4),
+			inset 1px 1px 0 rgba(255, 255, 255, 0.4);
+	}
+
+	.status-offline {
+		background: var(--nes-red);
+		box-shadow:
+			0 0 10px rgba(228, 0, 88, 0.8),
+			0 0 18px rgba(228, 0, 88, 0.4),
+			inset 1px 1px 0 rgba(255, 255, 255, 0.4);
+	}
+
+	.status-checking {
+		background: var(--nes-yellow);
+		box-shadow:
+			0 0 10px rgba(255, 215, 0, 0.8),
+			0 0 18px rgba(255, 215, 0, 0.4),
+			inset 1px 1px 0 rgba(255, 255, 255, 0.4);
+	}
+
+	/* Progress Bar - Mac Style */
+	.progress-mac {
+		background: var(--mac-bg-deep);
+		border: 2px solid;
+		border-color: var(--mac-shadow) var(--mac-platinum) var(--mac-platinum) var(--mac-shadow);
+		height: 20px;
+		overflow: hidden;
+		box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.5);
+		border-radius: 0;
+	}
+
+	.progress-mac-sm {
+		height: 14px;
+	}
+
+	.progress-mac-fill {
+		background: linear-gradient(
+			180deg,
+			var(--nes-cyan) 0%,
+			var(--nes-teal) 50%,
+			var(--nes-blue) 100%
+		);
+		border-right: 2px solid rgba(0, 0, 0, 0.3);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.3),
+			0 0 8px rgba(0, 229, 255, 0.4);
+		transition: width 0.3s ease;
+	}
+
+	/* Grid Pattern - Subtle */
+	.grid-mac {
+		background-image:
+			linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+		background-size: 32px 32px;
+	}
+
+	/* Authentic Mac OS Fish Pattern (simplified) */
+	.fish-pattern {
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23252525'/%3E%3Cpath d='M0 0h8v8H0zM8 8h8v8H8z' fill='%232d2d2d'/%3E%3C/svg%3E");
+		background-size: 16px 16px;
+	}
+
+	/* Modal Backdrop */
+	.modal-mac-backdrop {
+		background: rgba(26, 26, 26, 0.95);
+		backdrop-filter: blur(1px);
+	}
+
+	/* Classic Mac Menu Bar Style */
+	.menu-bar-mac {
+		background: linear-gradient(180deg, var(--mac-bg-lighter) 0%, var(--mac-bg-light) 100%);
+		border-bottom: 2px solid;
+		border-color: var(--mac-platinum-dark) var(--mac-shadow) var(--mac-shadow)
+			var(--mac-platinum-dark);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 	}
 }
 
-@keyframes pulse-glow {
+/* Animations - NES Style */
+@keyframes blink {
 	0%,
 	100% {
-		opacity: 0.3;
+		opacity: 1;
 	}
 	50% {
-		opacity: 0.7;
+		opacity: 0.4;
 	}
 }
 
-.animate-pulse-glow {
-	animation: pulse-glow 2s ease-in-out infinite;
+@keyframes pulse-pixel {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+	75% {
+		opacity: 0.8;
+	}
+}
+
+@keyframes screen-flicker {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.995;
+	}
+	52% {
+		opacity: 1;
+	}
+	55% {
+		opacity: 0.998;
+	}
+	56% {
+		opacity: 1;
+	}
+}
+
+.animate-blink {
+	animation: blink 1s step-end infinite;
+}
+
+.animate-pulse-pixel {
+	animation: pulse-pixel 2s ease-in-out infinite;
+}
+
+/* Screen flicker for CRT effect */
+.screen-flicker {
+	animation: screen-flicker 0.15s linear infinite;
+}
+
+/* Custom Scrollbar - Mac Style */
+::-webkit-scrollbar {
+	width: 14px;
+	height: 14px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--mac-bg-deep);
+	border: 2px solid;
+	border-color: var(--mac-shadow) var(--mac-platinum) var(--mac-platinum) var(--mac-shadow);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--mac-bg-medium);
+	border: 2px solid;
+	border-color: var(--mac-platinum-light) var(--mac-shadow) var(--mac-shadow)
+		var(--mac-platinum-light);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--mac-bg-light);
+}
+
+::-webkit-scrollbar-corner {
+	background: var(--mac-bg-deep);
+}
+
+/* Selection - NES Cyan */
+::selection {
+	background: var(--nes-cyan);
+	color: var(--mac-bg-deep);
+	text-shadow: none;
+}
+
+/* Focus Styles - NES Accent */
+:focus-visible {
+	outline: 2px solid var(--nes-cyan);
+	outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
 }
