@@ -106,6 +106,11 @@
 		editingApp = null;
 	}
 
+	function handleCloseWindow() {
+		// Navigate to a shutdown/goodbye page or close the application view
+		window.location.href = '/shutdown';
+	}
+
 	async function handleSave(app: (typeof apps)[0]) {
 		try {
 			if (app.id) {
@@ -189,7 +194,7 @@
 			<!-- Window Title Bar - Active -->
 			<div class="window-title-active flex items-center justify-between">
 				<div class="flex items-center gap-3">
-					<div class="mac-close-btn" aria-label="Close"></div>
+					<button onclick={handleCloseWindow} class="mac-close-btn" aria-label="Close"></button>
 					<span>zamOS Desktop v{VERSION}</span>
 				</div>
 				<div class="flex items-center gap-2">
