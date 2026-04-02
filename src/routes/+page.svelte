@@ -191,17 +191,21 @@
 	}
 </script>
 
-<div class="min-h-screen bg-mac-deep grid-mac p-4 md:p-8 app-container screen-flicker">
+<div class="min-h-screen bg-mac-deep grid-mac p-2 sm:p-4 md:p-8 app-container screen-flicker">
 	<!-- Clean Header -->
-	<header class="mb-6 max-w-6xl mx-auto">
-		<div class="menu-bar-mac px-4 py-2 flex items-center justify-between">
-			<span class="font-system text-mac-primary">zamOS</span>
-			<div class="font-terminal text-mac-secondary flex items-center gap-3">
+	<header class="mb-4 md:mb-6 max-w-6xl mx-auto">
+		<div
+			class="menu-bar-mac px-2 md:px-4 py-2 flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-0"
+		>
+			<span class="font-system text-mac-primary text-xs sm:text-sm">zamOS</span>
+			<div
+				class="font-terminal text-mac-secondary flex items-center gap-2 md:gap-3 text-sm md:text-base"
+			>
 				{#if !isOnline}
-					<span class="text-nes-red font-bold" title="Offline mode">OFFLINE</span>
+					<span class="text-nes-red font-bold text-xs" title="Offline mode">OFFLINE</span>
 				{/if}
-				<span>{formatDate(currentTime)}</span>
-				<span class="text-nes-cyan">{formatTime(currentTime)}</span>
+				<span class="text-xs md:text-base">{formatDate(currentTime)}</span>
+				<span class="text-nes-cyan text-xs md:text-base">{formatTime(currentTime)}</span>
 			</div>
 		</div>
 	</header>
@@ -210,65 +214,86 @@
 	<main class="max-w-6xl mx-auto">
 		<div class="window-chrome">
 			<!-- Window Title Bar - Active -->
-			<div class="window-title-active flex items-center justify-between">
-				<div class="flex items-center gap-3">
+			<div
+				class="window-title-active flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-3 py-2 sm:px-4 sm:py-2"
+			>
+				<div class="flex items-center gap-2 sm:gap-3">
 					<button onclick={handleCloseWindow} class="mac-close-btn" aria-label="Close"></button>
-					<span>zamOS Desktop v{VERSION}</span>
+					<span class="text-[10px] sm:text-xs">zamOS Desktop v{VERSION}</span>
 				</div>
 				<div class="flex items-center gap-2">
 					{#if !isOnline}
-						<span class="text-nes-red font-terminal text-xs">OFFLINE</span>
+						<span class="text-nes-red font-terminal text-[8px] sm:text-xs">OFFLINE</span>
 					{/if}
-					<div class="w-3 h-3 {isOnline ? 'bg-nes-lime' : 'bg-nes-red'} animate-pulse-pixel"></div>
+					<div
+						class="w-2 h-2 sm:w-3 sm:h-3 {isOnline
+							? 'bg-nes-lime'
+							: 'bg-nes-red'} animate-pulse-pixel"
+					></div>
 				</div>
 			</div>
 
 			<!-- Window Content -->
-			<div class="p-6 bg-mac-dark dither-mac">
+			<div class="p-3 sm:p-4 md:p-6 bg-mac-dark dither-mac">
 				<!-- Header Content -->
 				<div
-					class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 pb-6 border-b-2 border-mac-platinum-dark"
+					class="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 mb-6 md:mb-8 pb-4 md:pb-6 border-b-2 border-mac-platinum-dark"
 				>
-					<div class="flex items-center gap-4">
-						<div>
-							<h1 class="font-system text-xl text-nes-cyan uppercase tracking-wider mb-1">zamOS</h1>
-							<p class="font-terminal text-mac-secondary tracking-wide">Home Server Dashboard</p>
+					<div class="flex items-center gap-3 md:gap-4">
+						<div class="text-center md:text-left">
+							<h1
+								class="font-system text-lg md:text-xl text-nes-cyan uppercase tracking-wider mb-1"
+							>
+								zamOS
+							</h1>
+							<p class="font-terminal text-mac-secondary tracking-wide text-sm md:text-base">
+								Home Server Dashboard
+							</p>
 						</div>
 					</div>
 
-					<button onclick={openAddModal} class="btn-mac btn-nes">
+					<button
+						onclick={openAddModal}
+						class="btn-mac btn-nes text-xs md:text-sm py-2 px-3 md:py-3 md:px-4"
+					>
 						<span>[+]</span> ADD APP
 					</button>
 				</div>
 
 				<!-- Applications Section -->
-				<section class="mb-8">
+				<section class="mb-6 md:mb-8">
 					<!-- Section Header -->
-					<div class="flex items-center gap-4 mb-6">
+					<div class="flex items-center gap-2 md:gap-4 mb-4 md:mb-6">
 						<div class="h-px flex-1 bg-mac-platinum-dark"></div>
-						<h2 class="font-system text-nes-yellow uppercase tracking-widest text-sm">
+						<h2
+							class="font-system text-nes-yellow uppercase tracking-widest text-[10px] md:text-sm"
+						>
 							Applications ({apps.length})
 						</h2>
 						<div class="h-px flex-1 bg-mac-platinum-dark"></div>
 					</div>
 
 					<!-- Apps Grid -->
-					<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+					<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
 						{#each apps as app (app.id)}
 							<AppCard {app} {appStatuses} onEdit={openEditModal} onDelete={handleDelete} />
 						{/each}
 					</div>
 
 					{#if apps.length === 0}
-						<div class="card-mac p-8 text-center">
-							<p class="font-system text-mac-muted uppercase">No Applications Found</p>
-							<p class="font-terminal text-mac-tertiary mt-2">Click "ADD APP" to get started</p>
+						<div class="card-mac p-6 md:p-8 text-center">
+							<p class="font-system text-mac-muted uppercase text-xs md:text-sm">
+								No Applications Found
+							</p>
+							<p class="font-terminal text-mac-tertiary mt-2 text-sm md:text-base">
+								Click "ADD APP" to get started
+							</p>
 						</div>
 					{/if}
 				</section>
 
 				<!-- System Stats Section -->
-				<section class="mt-8 pt-6 border-t-2 border-mac-platinum-dark">
+				<section class="mt-6 md:mt-8 pt-4 md:pt-6 border-t-2 border-mac-platinum-dark">
 					<SystemStats />
 				</section>
 			</div>
@@ -276,16 +301,20 @@
 	</main>
 
 	<!-- Footer -->
-	<footer class="mt-8 pb-8 max-w-6xl mx-auto">
-		<div class="card-mac p-4 text-center">
-			<div class="flex items-center justify-center gap-4">
-				<span class="font-system-sm text-mac-secondary uppercase">zamOS v{VERSION}</span>
-				<span class="text-mac-platinum">•</span>
-				<span class="font-system-sm text-mac-secondary">{currentTime.getFullYear()}</span>
-				<span class="text-mac-platinum">•</span>
+	<footer class="mt-4 md:mt-8 pb-4 md:pb-8 max-w-6xl mx-auto px-4 md:px-0">
+		<div class="card-mac p-3 md:p-4 text-center">
+			<div
+				class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm"
+			>
+				<div class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+					<span class="font-system-sm text-mac-secondary uppercase">zamOS v{VERSION}</span>
+					<span class="hidden sm:inline text-mac-platinum">•</span>
+					<span class="font-system-sm text-mac-secondary">{currentTime.getFullYear()}</span>
+				</div>
+				<span class="hidden sm:inline text-mac-platinum">•</span>
 				<span class="font-system-sm text-nes-lime">SYSTEM READY</span>
-				<span class="text-mac-platinum">•</span>
-				<span class="font-system-sm text-nes-cyan">█</span>
+				<span class="hidden sm:inline text-mac-platinum">•</span>
+				<span class="font-system-sm text-nes-cyan animate-pulse-pixel">█</span>
 			</div>
 		</div>
 	</footer>

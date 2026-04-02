@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap');
 @import 'tailwindcss';
 
-/* Early Mac + NES on CRT Theme v1.1.0 */
+/* Early Mac + NES on CRT Theme v1.2.0 */
 :root {
 	/* Mac Platinum Dark Mode Palette */
 	--mac-bg-deep: #1a1a1a;
@@ -127,6 +127,12 @@
 }
 
 @layer utilities {
+	/* Touch manipulation for mobile */
+	.touch-manipulation {
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: transparent;
+	}
+
 	/* System Font - Press Start 2P for headers */
 	.font-system {
 		font-family: 'Press Start 2P', sans-serif;

@@ -79,30 +79,32 @@
 	class="card-mac group relative overflow-hidden cursor-pointer hover:bg-mac-medium transition-all duration-150"
 >
 	<!-- Inner Inset Area for Content -->
-	<div class="card-mac-inset m-2 p-4 min-h-[180px] flex flex-col">
+	<div class="card-mac-inset m-1 sm:m-2 p-3 sm:p-4 min-h-[140px] sm:min-h-[180px] flex flex-col">
 		<!-- Icon Area - NES Style -->
-		<div class="flex-1 flex items-center justify-center mb-3">
+		<div class="flex-1 flex items-center justify-center mb-2 sm:mb-3">
 			{#if isIconUrl(app.icon)}
-				<div class="w-14 h-14 border-mac-inset bg-mac-deep flex items-center justify-center p-2">
+				<div
+					class="w-10 h-10 sm:w-14 sm:h-14 border-mac-inset bg-mac-deep flex items-center justify-center p-1 sm:p-2"
+				>
 					<img src={app.icon} alt={app.name} class="w-full h-full object-contain" />
 				</div>
 			{:else}
-				<div class="text-5xl animate-pulse-pixel text-nes-cyan">{app.icon}</div>
+				<div class="text-3xl sm:text-5xl animate-pulse-pixel text-nes-cyan">{app.icon}</div>
 			{/if}
 		</div>
 
 		<!-- Info Area -->
-		<div class="text-center mb-3">
-			<h3 class="font-system text-xs mb-1 text-mac-primary uppercase tracking-wider">
+		<div class="text-center mb-2 sm:mb-3">
+			<h3 class="font-system text-[10px] sm:text-xs mb-1 text-mac-primary uppercase tracking-wider">
 				{truncateName(app.name)}
 			</h3>
-			<p class="font-terminal text-mac-secondary leading-tight">
+			<p class="font-terminal text-sm sm:text-base text-mac-secondary leading-tight">
 				{truncateDescription(app.description)}
 			</p>
 		</div>
 
 		<!-- Status Area - NES Pixel Style -->
-		<div class="border-t-2 border-mac-platinum-dark pt-3 mt-auto">
+		<div class="border-t-2 border-mac-platinum-dark pt-2 sm:pt-3 mt-auto">
 			<div class="flex items-center justify-center gap-2">
 				<div
 					class="status-dot {currentStatus === 'online'
@@ -112,16 +114,19 @@
 							: 'status-checking'}"
 					class:animate-blink={currentStatus === 'checking'}
 				></div>
-				<span class="font-system text-[10px]" style="color: {getStatusColor(currentStatus)}">
+				<span
+					class="font-system text-[8px] sm:text-[10px]"
+					style="color: {getStatusColor(currentStatus)}"
+				>
 					{getStatusLabel(currentStatus)}
 				</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- Action Buttons - Mac Style -->
+	<!-- Action Buttons - Mac Style (always visible on mobile for better UX) -->
 	<div
-		class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+		class="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10"
 	>
 		{#if onEdit}
 			<button
@@ -129,7 +134,7 @@
 					e.stopPropagation();
 					onEdit(app);
 				}}
-				class="w-6 h-6 bg-mac-medium border border-mac-platinum flex items-center justify-center text-mac-secondary text-[10px] font-system hover:bg-nes-orange hover:text-mac-deep hover:border-nes-orange transition-colors"
+				class="w-8 h-8 sm:w-6 sm:h-6 bg-mac-medium border border-mac-platinum flex items-center justify-center text-mac-secondary text-xs sm:text-[10px] font-system hover:bg-nes-orange hover:text-mac-deep hover:border-nes-orange transition-colors touch-manipulation"
 				aria-label="Edit"
 			>
 				E
@@ -143,7 +148,7 @@
 						onDelete(app.id!);
 					}
 				}}
-				class="w-6 h-6 bg-mac-medium border border-mac-platinum flex items-center justify-center text-mac-secondary text-[10px] font-system hover:bg-nes-red hover:text-mac-deep hover:border-nes-red transition-colors"
+				class="w-8 h-8 sm:w-6 sm:h-6 bg-mac-medium border border-mac-platinum flex items-center justify-center text-mac-secondary text-xs sm:text-[10px] font-system hover:bg-nes-red hover:text-mac-deep hover:border-nes-red transition-colors touch-manipulation"
 				aria-label="Delete"
 			>
 				X

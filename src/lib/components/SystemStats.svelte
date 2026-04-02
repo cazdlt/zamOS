@@ -89,23 +89,23 @@
 
 <div class="card-mac p-0 overflow-hidden">
 	<!-- Window Title Bar -->
-	<div class="window-title flex items-center justify-between">
-		<span class="font-system">System Status Monitor</span>
+	<div class="window-title flex items-center justify-between px-2 sm:px-3 py-1 sm:py-2">
+		<span class="font-system text-[10px] sm:text-xs">System Status Monitor</span>
 		<div class="w-2 h-2 bg-nes-lime animate-pulse-pixel"></div>
 	</div>
 
 	<!-- Stats Grid - Mac Style -->
-	<div class="p-4 bg-mac-dark dither-mac">
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+	<div class="p-2 sm:p-4 bg-mac-dark dither-mac">
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
 			{#each stats as stat (stat.label)}
-				<div class="card-mac-inset p-3">
+				<div class="card-mac-inset p-2 sm:p-3">
 					<!-- Header with Icon -->
-					<div class="flex items-center justify-between mb-2">
-						<div class="flex items-center gap-2">
-							<span class="font-system text-[10px] text-nes-cyan">{stat.icon}</span>
-							<span class="font-system text-mac-primary">{stat.label}</span>
+					<div class="flex items-center justify-between mb-1 sm:mb-2">
+						<div class="flex items-center gap-1 sm:gap-2">
+							<span class="font-system text-[8px] sm:text-[10px] text-nes-cyan">{stat.icon}</span>
+							<span class="font-system text-[10px] sm:text-xs text-mac-primary">{stat.label}</span>
 						</div>
-						<div class="font-terminal text-sm">
+						<div class="font-terminal text-xs sm:text-sm">
 							<span class="text-nes-cyan phosphor-glow">{formatValue(stat.value)}</span>
 							<span class="text-mac-muted">{stat.unit}</span>
 							{#if stat.total}
@@ -115,7 +115,7 @@
 					</div>
 
 					<!-- Progress Bar - Mac Style -->
-					<div class="progress-mac progress-mac-sm">
+					<div class="progress-mac progress-mac-sm h-3 sm:h-[14px]">
 						<div
 							class="progress-mac-fill h-full transition-all duration-300"
 							style="width: {getPercentage(
