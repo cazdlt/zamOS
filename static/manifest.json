@@ -1,0 +1,60 @@
+{
+	"name": "zamOS",
+	"short_name": "zamOS",
+	"description": "A beautiful, modern home server dashboard for monitoring system resources and managing applications",
+	"start_url": "/",
+	"display": "standalone",
+	"orientation": "portrait",
+	"background_color": "#0a0a0a",
+	"theme_color": "#1a1a1a",
+	"categories": ["utilities", "productivity", "monitoring"],
+	"lang": "en",
+	"dir": "ltr",
+	"icons": [
+		{
+			"src": "/icon-192.png",
+			sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "/icon-512.png",
+			sizes": "512x512",
+			"type": "image/png"
+		},
+		{
+			"src": "/icon-192-maskable.png",
+			sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/icon-512-maskable.png",
+			sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	],
+	"screenshots": [
+		{
+			"src": "/screenshot-narrow.png",
+			sizes": "540x960",
+			"type": "image/png",
+			"form_factor": "narrow"
+		},
+		{
+			"src": "/screenshot-wide.png",
+			sizes": "1280x720",
+			"type": "image/png",
+			"form_factor": "wide"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Dashboard",
+			"short_name": "Dashboard",
+			"description": "View system dashboard",
+			"url": "/",
+			"icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+		}
+	]
+}

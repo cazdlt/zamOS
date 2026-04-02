@@ -24,6 +24,7 @@
 	let isModalOpen = $state(false);
 	let editingApp = $state<(typeof apps)[0] | null>(null);
 	let appStatuses = $state<Record<string, AppStatus>>({});
+	let isOnline = $state(true);
 
 	$effect(() => {
 		const interval = setInterval(() => {
@@ -31,6 +32,20 @@
 		}, 1000);
 
 		return () => clearInterval(interval);
+	});
+
+	$effect(() => {
+		const handleOnline = () => (isOnline = true);
+		const handleOffline = () => (isOnline = false);
+
+		isOnline = navigator.onLine;
+		window.addEventListener('online', handleOnline);
+		window.addEventListener('offline', handleOffline);
+
+		return () => {
+			window.removeEventListener('online', handleOnline);
+			window.removeEventListener('offline', handleOffline);
+		};
 	});
 
 	async function checkAllAppStatuses() {
@@ -182,6 +197,9 @@
 		<div class="menu-bar-mac px-4 py-2 flex items-center justify-between">
 			<span class="font-system text-mac-primary">zamOS</span>
 			<div class="font-terminal text-mac-secondary flex items-center gap-3">
+				{#if !isOnline}
+					<span class="text-nes-red font-bold" title="Offline mode">OFFLINE</span>
+				{/if}
 				<span>{formatDate(currentTime)}</span>
 				<span class="text-nes-cyan">{formatTime(currentTime)}</span>
 			</div>
@@ -198,7 +216,10 @@
 					<span>zamOS Desktop v{VERSION}</span>
 				</div>
 				<div class="flex items-center gap-2">
-					<div class="w-3 h-3 bg-nes-lime animate-pulse-pixel"></div>
+					{#if !isOnline}
+						<span class="text-nes-red font-terminal text-xs">OFFLINE</span>
+					{/if}
+					<div class="w-3 h-3 {isOnline ? 'bg-nes-lime' : 'bg-nes-red'} animate-pulse-pixel"></div>
 				</div>
 			</div>
 
