@@ -262,7 +262,7 @@
 
 				<!-- System Stats Section -->
 				<section class="mb-6 md:mb-8">
-					<SystemStats />
+					<SystemStats initialMetrics={data.systemMetrics} />
 				</section>
 
 				<!-- Applications Section -->
