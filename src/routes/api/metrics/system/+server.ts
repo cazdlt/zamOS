@@ -12,6 +12,7 @@ export const GET: RequestHandler = async () => {
 			{
 				error: 'Failed to fetch system metrics',
 				cpu: 0,
+				cpuHistory: [],
 				ram: {
 					used: 0,
 					total: 0,
@@ -20,6 +21,7 @@ export const GET: RequestHandler = async () => {
 					rawUsedBytes: 0,
 					rawTotalBytes: 0
 				},
+				ramHistory: [],
 				ramUsed: 0,
 				ramTotal: 0,
 				diskUsed: 0,

@@ -260,6 +260,11 @@
 					</button>
 				</div>
 
+				<!-- System Stats Section -->
+				<section class="mb-6 md:mb-8">
+					<SystemStats />
+				</section>
+
 				<!-- Applications Section -->
 				<section class="mb-6 md:mb-8">
 					<!-- Section Header -->
@@ -290,11 +295,6 @@
 							</p>
 						</div>
 					{/if}
-				</section>
-
-				<!-- System Stats Section -->
-				<section class="mt-6 md:mt-8 pt-4 md:pt-6 border-t-2 border-mac-platinum-dark">
-					<SystemStats />
 				</section>
 			</div>
 		</div>

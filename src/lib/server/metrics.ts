@@ -86,7 +86,9 @@ export interface RamMetric {
 
 export interface SystemMetrics {
 	cpu: number;
+	cpuHistory?: number[];
 	ram: RamMetric;
+	ramHistory?: number[];
 	ramUsed: number;
 	ramTotal: number;
 	diskUsed: number;
@@ -274,6 +276,9 @@ export function parseDisks(
 }
 
 let lastCpuUsage = 0;
+const MAX_METRIC_HISTORY = 30;
+const cpuHistoryBuffer: number[] = [];
+const ramHistoryBuffer: number[] = [];
 
 export async function getSystemMetrics(): Promise<SystemMetrics> {
 	const si = await import('systeminformation');
@@ -310,6 +315,12 @@ export async function getSystemMetrics(): Promise<SystemMetrics> {
 			? Math.min(100, Math.max(0, Math.round((usedMemBytes / totalMemBytes) * 100)))
 			: 0;
 
+	cpuHistoryBuffer.push(cpuUsage);
+	if (cpuHistoryBuffer.length > MAX_METRIC_HISTORY) cpuHistoryBuffer.shift();
+
+	ramHistoryBuffer.push(ramPercent);
+	if (ramHistoryBuffer.length > MAX_METRIC_HISTORY) ramHistoryBuffer.shift();
+
 	const rawFs = await si.fsSize();
 	const disks = parseDisks(rawFs);
 
@@ -317,6 +328,7 @@ export async function getSystemMetrics(): Promise<SystemMetrics> {
 
 	return {
 		cpu: cpuUsage,
+		cpuHistory: [...cpuHistoryBuffer],
 		ram: {
 			used: ramUsedFormatted,
 			total: ramTotalFormatted,
@@ -325,6 +337,7 @@ export async function getSystemMetrics(): Promise<SystemMetrics> {
 			rawUsedBytes: usedMemBytes,
 			rawTotalBytes: totalMemBytes
 		},
+		ramHistory: [...ramHistoryBuffer],
 		ramUsed: ramUsedFormatted,
 		ramTotal: ramTotalFormatted,
 		diskUsed: primaryDisk ? primaryDisk.used : 0,
