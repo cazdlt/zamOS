@@ -20,6 +20,9 @@ RUN npm prune --production
 # Production image
 FROM node:22-alpine
 
+# Install procps for reliable system monitoring utilities
+RUN apk add --no-cache procps
+
 WORKDIR /app
 
 # Copy built app and dependencies from builder

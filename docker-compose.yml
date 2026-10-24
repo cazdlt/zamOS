@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: zamos-dashboard
+    pid: host
     ports:
       - '3000:3000'
     environment:
@@ -11,8 +12,10 @@ services:
       - PORT=3000
     volumes:
       - ./data:/data
-      - /proc:/proc
-      - /sys:/sys
+      - /proc:/proc:ro
+      - /sys:/sys:ro
+      - /:/host:ro,rslave
+      - /mnt:/mnt:ro,rslave
     privileged: true
     restart: unless-stopped
     networks:
