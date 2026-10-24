@@ -14,7 +14,7 @@ services:
       - ./data:/data
       - /proc:/proc:ro
       - /sys:/sys:ro
-      - /:/host:ro,rslave
+      - /:/host:ro
       - /mnt:/mnt:ro,rslave
     privileged: true
     restart: unless-stopped

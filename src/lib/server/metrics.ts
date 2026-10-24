@@ -95,6 +95,85 @@ export interface SystemMetrics {
 	timestamp: number;
 }
 
+function normalizeMount(mount: string): string {
+	if (mount === '/host' || mount === '/host/') return '/';
+	if (mount.startsWith('/host/')) return mount.slice(5);
+	return mount;
+}
+
+const IGNORED_FS_TYPES = new Set([
+	'tmpfs',
+	'devtmpfs',
+	'devpts',
+	'proc',
+	'sysfs',
+	'overlay',
+	'overlayfs',
+	'squashfs',
+	'iso9660',
+	'cgroup',
+	'cgroup2',
+	'pstore',
+	'bpf',
+	'tracefs',
+	'hugetlbfs',
+	'mqueue',
+	'autofs',
+	'ramfs',
+	'securityfs',
+	'configfs',
+	'debugfs',
+	'fusectl',
+	'binfmt_misc',
+	'rpc_pipefs',
+	'nfsd',
+	'efivarfs',
+	'fuse.gvfsd-fuse',
+	'fuse.portal',
+	'shm',
+	'nullfs'
+]);
+
+function isSystemPath(path: string): boolean {
+	const sysDirs = [
+		'/boot',
+		'/efi',
+		'/sys',
+		'/proc',
+		'/dev',
+		'/run',
+		'/etc',
+		'/var',
+		'/usr',
+		'/tmp',
+		'/opt',
+		'/snap',
+		'/root',
+		'/app',
+		'/data'
+	];
+	return sysDirs.some((dir) => path === dir || path.startsWith(dir + '/'));
+}
+
+function isValidStoragePath(path: string): boolean {
+	const allowedPrefixes = ['/mnt', '/media', '/storage', '/disks', '/Volumes'];
+	return allowedPrefixes.some((prefix) => path === prefix || path.startsWith(prefix + '/'));
+}
+
+function getDiskName(normMount: string): string {
+	const prefixes = ['/mnt/', '/media/', '/storage/', '/disks/', '/Volumes/'];
+	for (const prefix of prefixes) {
+		if (normMount.startsWith(prefix)) {
+			const rel = normMount.slice(prefix.length);
+			const segments = rel.split('/').filter(Boolean);
+			return segments[segments.length - 1] || rel;
+		}
+	}
+	const clean = normMount.replace(/^\/+/, '');
+	const segments = clean.split('/').filter(Boolean);
+	return segments[segments.length - 1] || normMount || 'DISK';
+}
+
 export function parseDisks(
 	rawDisks: import('systeminformation').Systeminformation.FsSizeData[]
 ): DiskMetric[] {
@@ -102,50 +181,14 @@ export function parseDisks(
 		return [];
 	}
 
-	const hasHostRoot = rawDisks.some((d) => d.mount === '/host');
+	const hasHostRoot = rawDisks.some((d) => d.mount === '/host' || d.mount === '/host/');
 
-	const filtered = rawDisks.filter((d) => {
-		if (!d.size || d.size <= 0) return false;
-		const mount = d.mount;
-		const type = (d.type || '').toLowerCase();
-		const fs = (d.fs || '').toLowerCase();
-
-		if (['tmpfs', 'devtmpfs', 'squashfs', 'iso9660', 'overlayfs'].includes(type)) return false;
-		if (fs.startsWith('tmpfs') || fs.startsWith('devtmpfs')) return false;
-
-		// When /host is mounted, ignore the container's overlay /
-		if (hasHostRoot && mount === '/' && type === 'overlay') return false;
-
-		if (
-			mount.startsWith('/boot') ||
-			mount.startsWith('/efi') ||
-			mount.startsWith('/sys') ||
-			mount.startsWith('/proc') ||
-			mount.startsWith('/dev')
-		) {
-			return false;
-		}
-
-		if (
-			mount === '/etc/hosts' ||
-			mount === '/etc/resolv.conf' ||
-			mount === '/etc/hostname' ||
-			mount === '/app' ||
-			mount === '/data'
-		) {
-			return false;
-		}
-
-		if (mount.startsWith('/System/Volumes') && mount !== '/System/Volumes/Data') {
-			return false;
-		}
-
-		return true;
-	});
-
-	const disks: DiskMetric[] = [];
-	const seenMounts = new Set<string>();
-	const seenFs = new Set<string>();
+	// Find the primary root OS disk entry
+	const rootEntry = hasHostRoot
+		? rawDisks.find((d) => d.mount === '/host' || d.mount === '/host/')
+		: rawDisks.find((d) => d.mount === '/System/Volumes/Data') ||
+			rawDisks.find((d) => d.mount === '/') ||
+			rawDisks[0];
 
 	const createMetric = (
 		d: import('systeminformation').Systeminformation.FsSizeData,
@@ -175,44 +218,53 @@ export function parseDisks(
 		};
 	};
 
-	// 1. Primary/Root OS disk
-	const rootEntry =
-		filtered.find((d) => d.mount === '/host') || filtered.find((d) => d.mount === '/');
-	if (rootEntry) {
+	const disks: DiskMetric[] = [];
+	const seenMounts = new Set<string>();
+	const seenFs = new Set<string>();
+
+	if (rootEntry && rootEntry.size > 0) {
 		disks.push(createMetric(rootEntry, '/', 'ROOT'));
 		seenMounts.add('/');
 		seenMounts.add('/host');
+		seenMounts.add('/System/Volumes/Data');
 		if (rootEntry.fs) seenFs.add(rootEntry.fs);
 	}
 
-	// 2. Disks mounted under /mnt/ or /host/mnt/
-	for (const d of filtered) {
+	for (const d of rawDisks) {
 		if (d === rootEntry) continue;
+		if (!d.size || d.size <= 0) continue;
 
-		let normMount = d.mount;
-		if (normMount.startsWith('/host/mnt/')) {
-			normMount = normMount.replace('/host/mnt/', '/mnt/');
-		} else if (normMount === '/host/mnt') {
-			normMount = '/mnt';
+		const normMount = normalizeMount(d.mount);
+		const type = (d.type || '').toLowerCase();
+		const fs = (d.fs || '').toLowerCase();
+
+		// Skip pseudo/virtual and container filesystem types
+		if (IGNORED_FS_TYPES.has(type)) continue;
+		if (
+			fs.startsWith('tmpfs') ||
+			fs.startsWith('devtmpfs') ||
+			fs.startsWith('udev') ||
+			fs.startsWith('overlay') ||
+			fs === 'none'
+		) {
+			continue;
 		}
+		if (fs.includes('loop')) continue;
 
-		const isMnt = normMount.startsWith('/mnt');
-		const isOtherValid = !normMount.startsWith('/System/Volumes') && normMount !== '/';
+		// Skip macOS internal volumes and system directories
+		if (normMount.startsWith('/System/Volumes') || normMount.startsWith('/Volumes/Macintosh HD')) {
+			continue;
+		}
+		if (isSystemPath(normMount)) continue;
 
-		if (!isMnt && !isOtherValid) continue;
+		// Only include valid dedicated storage locations
+		if (!isValidStoragePath(normMount)) continue;
+
+		// Deduplicate by mount point and physical filesystem/device
 		if (seenMounts.has(normMount)) continue;
-		if (d.fs && seenFs.has(d.fs) && seenMounts.has(normMount)) continue;
+		if (d.fs && seenFs.has(d.fs)) continue;
 
-		let name = normMount;
-		if (normMount.startsWith('/mnt/')) {
-			name = normMount.slice(5);
-		} else if (normMount.startsWith('/Volumes/')) {
-			name = normMount.slice(9);
-		} else if (normMount.startsWith('/')) {
-			name = normMount.slice(1);
-		}
-		if (!name) name = 'DISK';
-
+		const name = getDiskName(normMount);
 		disks.push(createMetric(d, normMount, name));
 		seenMounts.add(normMount);
 		if (d.fs) seenFs.add(d.fs);
