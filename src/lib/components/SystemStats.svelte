@@ -111,7 +111,7 @@
 	function generateSparkline(
 		history: number[],
 		width = 100,
-		height = 28
+		height = 32
 	): { linePath: string; areaPath: string } {
 		if (!history || history.length === 0) {
 			return { linePath: '', areaPath: '' };
@@ -198,9 +198,9 @@
 
 				<!-- Sparkline History Chart -->
 				<div
-					class="h-7 sm:h-8 w-full bg-mac-deep border border-mac-platinum-dark relative overflow-hidden"
+					class="h-8 sm:h-9 w-full bg-mac-deep border border-mac-platinum-dark relative overflow-hidden"
 				>
-					<svg class="w-full h-full block" viewBox="0 0 100 28" preserveAspectRatio="none">
+					<svg class="w-full h-full block" viewBox="0 0 100 32" preserveAspectRatio="none">
 						<defs>
 							<linearGradient id="cpu-grad" x1="0" y1="0" x2="0" y2="1">
 								<stop offset="0%" stop-color="var(--nes-cyan)" stop-opacity="0.45" />
@@ -210,9 +210,9 @@
 						<!-- 50% guideline -->
 						<line
 							x1="0"
-							y1="14"
+							y1="16"
 							x2="100"
-							y2="14"
+							y2="16"
 							stroke="var(--mac-platinum-dark)"
 							stroke-dasharray="2 2"
 							stroke-width="0.5"
@@ -237,17 +237,6 @@
 						LAST 60s
 					</span>
 				</div>
-
-				<!-- Progress Bar -->
-				<div class="progress-mac progress-mac-sm h-3 sm:h-[14px]">
-					<div
-						class="progress-mac-fill h-full transition-all duration-300"
-						style="width: {cpuVal}%; background: linear-gradient(180deg, {getStatusColor(
-							cpuVal
-						)} 0%, var(--nes-teal) 100%)"
-						title="{cpuVal}%"
-					></div>
-				</div>
 			</div>
 
 			<!-- RAM Card -->
@@ -270,9 +259,9 @@
 
 				<!-- Sparkline History Chart -->
 				<div
-					class="h-7 sm:h-8 w-full bg-mac-deep border border-mac-platinum-dark relative overflow-hidden"
+					class="h-8 sm:h-9 w-full bg-mac-deep border border-mac-platinum-dark relative overflow-hidden"
 				>
-					<svg class="w-full h-full block" viewBox="0 0 100 28" preserveAspectRatio="none">
+					<svg class="w-full h-full block" viewBox="0 0 100 32" preserveAspectRatio="none">
 						<defs>
 							<linearGradient id="ram-grad" x1="0" y1="0" x2="0" y2="1">
 								<stop offset="0%" stop-color="var(--nes-teal)" stop-opacity="0.45" />
@@ -282,9 +271,9 @@
 						<!-- 50% guideline -->
 						<line
 							x1="0"
-							y1="14"
+							y1="16"
 							x2="100"
-							y2="14"
+							y2="16"
 							stroke="var(--mac-platinum-dark)"
 							stroke-dasharray="2 2"
 							stroke-width="0.5"
@@ -309,17 +298,6 @@
 						LAST 60s
 					</span>
 				</div>
-
-				<!-- Progress Bar -->
-				<div class="progress-mac progress-mac-sm h-3 sm:h-[14px]">
-					<div
-						class="progress-mac-fill h-full transition-all duration-300"
-						style="width: {ramVal.percent}%; background: linear-gradient(180deg, {getStatusColor(
-							ramVal.percent
-						)} 0%, var(--nes-teal) 100%)"
-						title="{ramVal.percent}%"
-					></div>
-				</div>
 			</div>
 		</div>
 
@@ -343,27 +321,18 @@
 						: ''} gap-2 sm:gap-2.5"
 				>
 					{#each disks as disk, idx (disk.mount + idx)}
-						<div class="card-mac-inset p-2 sm:p-2.5 flex flex-col justify-between gap-1.5 min-w-0">
-							<!-- Disk Name and Usage Row -->
-							<div class="flex items-start justify-between gap-2 min-w-0">
-								<div class="min-w-0 flex-1">
-									<div class="flex items-center gap-1.5 min-w-0">
-										<span class="font-system text-[8px] text-nes-cyan shrink-0">◉</span>
-										<span
-											class="font-system text-[9px] sm:text-[10px] text-mac-primary break-all leading-tight"
-											title="{disk.name} ({disk.mount})"
-										>
-											{disk.mount === '/' ? '/ (ROOT)' : disk.name}
-										</span>
-									</div>
-									{#if disk.mount !== '/'}
-										<div
-											class="font-terminal text-[11px] sm:text-xs text-mac-muted truncate mt-0.5 leading-tight"
-											title={disk.mount}
-										>
-											{disk.mount}
-										</div>
-									{/if}
+						<div class="card-mac-inset p-2.5 sm:p-3 flex flex-col justify-between gap-2 min-w-0">
+							<!-- Disk Name and Usage Row - Single Clean Line -->
+							<div class="flex items-center justify-between gap-2 min-w-0">
+								<div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+									<span class="font-system text-[8px] sm:text-[10px] text-nes-cyan shrink-0">◉</span
+									>
+									<span
+										class="font-system text-[10px] sm:text-xs text-mac-primary truncate"
+										title="{disk.name} ({disk.mount})"
+									>
+										{disk.mount === '/' ? '/' : disk.name}
+									</span>
 								</div>
 
 								<div class="font-terminal text-xs sm:text-sm text-right shrink-0 whitespace-nowrap">
@@ -375,7 +344,7 @@
 							</div>
 
 							<!-- Progress Bar -->
-							<div class="progress-mac progress-mac-sm h-2.5 sm:h-3">
+							<div class="progress-mac progress-mac-sm h-3 sm:h-[14px]">
 								<div
 									class="progress-mac-fill h-full transition-all duration-300"
 									style="width: {disk.usePercent}%; background: linear-gradient(180deg, {getStatusColor(
